@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "e-commerce-backend-app.fullname" . }}
+  labels:
+    app: {{ include "e-commerce-backend-app.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "e-commerce-backend-app.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "e-commerce-backend-app.name" . }}
+    spec:
+      serviceAccountName: {{ include "e-commerce-backend-app.fullname" . }}
+      containers:
+        - name: {{ include "e-commerce-backend-app.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 5000

@@ -1,0 +1,24 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "e-commerce-backend-app.fullname" . }}
+  labels:
+    app: {{ include "e-commerce-backend-app.name" . }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "e-commerce-backend-app.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}
+{{- end }}
