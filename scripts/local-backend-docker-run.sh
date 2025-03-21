@@ -9,10 +9,8 @@ IMAGE_VERSION=$(cat .env | grep BACKEND_DOCKER_HUB_IMAGE_VERSION | cut -d '=' -f
 ENV=$(cat .env | grep BACKEND_DOCKER_HUB_ENV | cut -d '=' -f 2)
 APP_NAME=$(cat .env | grep BACKEND_DOCKER_HUB_APP_NAME | cut -d '=' -f 2)
 
-echo "Installing HELM Chart $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
+echo "Running Docker image $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
 
-helm install e-commerce-backend-app ./k8s/backend-helm \
-  --set image.repository="$IMAGE_REPO/$IMAGE_NAME" \
-  --set image.tag="v$IMAGE_VERSION" \
-  --set env.env="$ENV" \
-  --set env.appName="$APP_NAME"
+cd app/backend-app
+
+docker run -e ENV="$ENV" -e APP_NAME="$APP_NAME" $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION

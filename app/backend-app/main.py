@@ -1,7 +1,11 @@
 from flask import Flask
 from auth.auth_controller import auth_bp
+from config.config import Config
 
 app = Flask(__name__)
+config = Config()
+
+print(f"Starting {config.APP_NAME} in {config.ENV} mode...")
 
 @app.route("/healthz")
 def healthz():

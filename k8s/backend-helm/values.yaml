@@ -2,7 +2,7 @@ replicaCount: 1
 
 serviceAccount:
   # Override default name by setting this (e.g. --set serviceAccount.name=my-custom-sa)
-  name: ""
+  name: "serviceaccount-name"
   # Set this to the IAM Role ARN (e.g. --set serviceAccount.roleArn=arn:aws:iam::<ACCOUNT_ID>:role/<YOUR_EKS_KINESIS_ACCESS_ROLE>)
   roleArn: ""
 
@@ -11,6 +11,10 @@ image:
   repository: <your-aws-account-id>.dkr.ecr.<region>.amazonaws.com/e-commerce-backend-app
   pullPolicy: IfNotPresent
   tag: "v0.0.1"
+
+env:
+  env: "dev"
+  appName: "e-commerce"
 
 service:
   type: LoadBalancer

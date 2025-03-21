@@ -1,5 +1,5 @@
 apiVersion: v2
-name: e-commerce-backend-app
+name: helm-flask
 description: A Helm chart for deploying an e-commerce backend Flask application.
 type: application
 version: 0.1.0

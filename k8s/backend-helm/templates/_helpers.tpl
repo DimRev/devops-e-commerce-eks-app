@@ -1,16 +1,37 @@
 {{/*
-Expand the name of the chart.
+Return the environment value.
 */}}
-{{- define "e-commerce-backend-app.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "e-commerce-backend-app.env" -}}
+  {{- default "dev" .Values.env.env -}}
 {{- end -}}
 
 {{/*
-Create a default fully qualified app name.
+Return the application name.
+*/}}
+{{- define "e-commerce-backend-app.appName" -}}
+  {{- default "e-commerce" .Values.env.appName -}}
+{{- end -}}
+
+{{/*
+Compute the base name by combining env and appName.
+Example: "dev-e-commerce"
+*/}}
+{{- define "e-commerce-backend-app.name" -}}
+  {{- printf "%s-%s" (include "e-commerce-backend-app.env" .) (include "e-commerce-backend-app.appName" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified app name.
+If the release name is the same as the computed name, just use that.
+Otherwise, prepend the release name.
 */}}
 {{- define "e-commerce-backend-app.fullname" -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+  {{- $name := include "e-commerce-backend-app.name" . -}}
+  {{- if eq .Release.Name $name -}}
+    {{- $name | trunc 63 | trimSuffix "-" -}}
+  {{- else -}}
+    {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+  {{- end -}}
 {{- end -}}
 
 {{/*
