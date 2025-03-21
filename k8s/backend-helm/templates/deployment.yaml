@@ -17,7 +17,7 @@ spec:
       serviceAccountName: {{ include "e-commerce-backend-app.fullname" . }}
       containers:
         - name: {{ include "e-commerce-backend-app.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}:v{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 5000

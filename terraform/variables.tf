@@ -33,3 +33,8 @@ variable "eks_nodes_min_size" {
   default     = 2
 }
 
+variable "app_name" {
+  description = "The name of the Jenkins instance."
+  type        = string
+  default     = "e-commerce"
+}

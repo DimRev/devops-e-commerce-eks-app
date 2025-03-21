@@ -6,6 +6,6 @@ IMAGE_VERSION=$(cat .env | grep BACKEND_DOCKER_HUB_IMAGE_VERSION | cut -d '=' -f
 
 echo "Push $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
 
-helm install ecommerce-backend-app ./k8s/backend-helm \
+helm upgrade e-commerce-backend-app ./k8s/backend-helm \
   --set image.repository="$IMAGE_REPO/$IMAGE_NAME" \
   --set image.tag="v$IMAGE_VERSION"
