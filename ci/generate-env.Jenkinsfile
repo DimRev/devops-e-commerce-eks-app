@@ -54,9 +54,9 @@ pipeline {
                 try {
                     withCredentials([
                         [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                        [string(credentialsId: 's3_backend', variable: 'S3_BACKEND')]
+                        [string(credentialsId: 's3_backend_name', variable: 's3_backend_name')]
                     ]) {
-                        def fileStatus = sh(script: "aws s3 ls ${S3_BACKEND}/envs/.env.${env.ENV}", returnStatus: true)
+                        def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}", returnStatus: true)
                         if (fileStatus == 0) {
                             echo "File .env.${env.ENV} exists in bucket."
                             def userChoice = input(
@@ -70,7 +70,7 @@ pipeline {
                                 ]
                             )
                             if (userChoice == "Yes") {
-                                sh "aws s3 rm ${S3_BACKEND}/envs/.env.${env.ENV}"
+                                sh "aws s3 rm s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}"
                                 echo "File .env.${env.ENV} deleted from bucket."
                             } else {
                                 error("User chose to abort and not delete the file")
@@ -130,10 +130,10 @@ pipeline {
 
                         withCredentials([
                             [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                            [string(credentialsId: 's3_backend', variable: 'S3_BACKEND')]
+                            [string(credentialsId: 's3_backend_name', variable: 's3_backend_name')]
                         ]) {
-                            sh "aws s3 cp .env.${env.ENV} ${S3_BACKEND}/envs/.env.${env.ENV}"
-                            def fileStatus = sh(script: "aws s3 ls ${S3_BACKEND}/envs/.env.${env.ENV}", returnStatus: true)
+                            sh "aws s3 cp .env.${env.ENV} s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}"
+                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}", returnStatus: true)
                             if (fileStatus == 0) {
                                 echo "File .env.${env.ENV} uploaded to bucket"
                             } else {

@@ -11,7 +11,7 @@ APP_NAME=$(cat .env | grep BACKEND_APP_NAME | cut -d '=' -f 2)
 
 echo "Installing HELM Chart $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
 
-helm install e-commerce-backend-app ./k8s/backend-helm \
+helm install $ENV-$APP_NAME-Chart ./k8s/backend-helm \
   --set image.repository="$IMAGE_REPO/$IMAGE_NAME" \
   --set image.tag="v$IMAGE_VERSION" \
   --set env.env="$ENV" \
