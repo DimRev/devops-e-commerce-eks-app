@@ -9,6 +9,8 @@ class Config:
             # Initialize once here by setting the underlying variables
             cls._instance._ENV = os.getenv("ENV")
             cls._instance._APP_NAME = os.getenv("APP_NAME")
+            cls._instance._KINESIS_STREAM_NAME = os.getenv("KINESIS_STREAM_NAME")
+            cls._instance._AWS_REGION = os.getenv("AWS_REGION")
         return cls._instance
 
 
@@ -22,3 +24,11 @@ class Config:
     @property
     def APP_NAME(self):
         return self._APP_NAME
+
+    @property
+    def KINESIS_STREAM_NAME(self):
+        return self._KINESIS_STREAM_NAME
+
+    @property
+    def AWS_REGION(self):
+        return self._AWS_REGION

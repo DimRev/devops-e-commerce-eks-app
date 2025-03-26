@@ -1,47 +1,36 @@
-class LoginRequestSchema:
-    def __init__(self, email, password):
-        self.email = email
-        self.password = password
+from pydantic import BaseModel, EmailStr, ValidationError
 
-class LogoutRequestSchema:
+class LoginRequestSchema(BaseModel):
+    email: EmailStr
+    password: str
+
+class LogoutRequestSchema(BaseModel):
+    # No fields defined; extend as needed
     pass
 
-class RegisterRequestSchema:
-    def __init__(self, email, username, password):
-        self.email = email
-        self.username = username
-        self.password = password
+class RegisterRequestSchema(BaseModel):
+    email: EmailStr
+    username: str
+    password: str
 
 def login_request_schema(req: dict) -> LoginRequestSchema:
+    # Get data from the request; works for Flask's request or a plain dict
     data = req.get_json() if hasattr(req, 'get_json') else req
+    try:
+        return LoginRequestSchema.model_validate(data)
+    except ValidationError as e:
+        raise ValueError(f"Invalid login request: {e}")
 
-    if 'email' not in data or 'password' not in data:
-        raise ValueError("Invalid login request. 'email' and 'password' are required.")
-
-    email = data['email']
-    password = data['password']
-    if not isinstance(email, str) or not isinstance(password, str):
-        raise ValueError("Invalid data types for 'email' or 'password'.")
-
-    return LoginRequestSchema(email, password)
-
-
-def logout_request_schema(req: dict):
-    return LogoutRequestSchema()
-
-
-def register_request_schema(req: dict):
+def logout_request_schema(req: dict) -> LogoutRequestSchema:
     data = req.get_json() if hasattr(req, 'get_json') else req
+    try:
+        return LogoutRequestSchema.model_validate(data)
+    except ValidationError as e:
+        raise ValueError(f"Invalid logout request: {e}")
 
-    required_fields = ['email', 'username', 'password']
-    for field in required_fields:
-        if field not in data:
-            raise ValueError(f"Invalid register request. '{field}' is required.")
-
-    email = data['email']
-    username = data['username']
-    password = data['password']
-    if not all(isinstance(field, str) for field in [email, username, password]):
-        raise ValueError("All fields ('email', 'username', 'password') must be strings.")
-
-    return RegisterRequestSchema(email, username, password)
+def register_request_schema(req: dict) -> RegisterRequestSchema:
+    data = req.get_json() if hasattr(req, 'get_json') else req
+    try:
+        return RegisterRequestSchema.model_validate(data)
+    except ValidationError as e:
+        raise ValueError(f"Invalid register request: {e}")

@@ -26,3 +26,7 @@ spec:
               value: {{ .Values.env.env }}
             - name: APP_NAME
               value: {{ .Values.env.appName }}
+            - name: KINESIS_STREAM_NAME
+              value: {{ .Values.env.kinesisStreamName }}
+            - name: AWS_REGION
+              value: {{ .Values.env.awsRegion }}

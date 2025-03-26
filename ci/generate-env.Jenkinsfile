@@ -105,6 +105,8 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the backend image name', name: 'BACKEND_IMAGE_NAME'),
                                 string(defaultValue: '', description: 'Enter the backend image repository', name: 'BACKEND_IMAGE_REPO'),
                                 string(defaultValue: '', description: 'Enter the backend image version', name: 'BACKEND_IMAGE_VERSION')
+                                string(defaultValue: '', description: 'Enter the backend kinesis stream name', name: 'BACKEND_KINESIS_STREAM_NAME'),
+                                string(defaultValue: '', description: 'Enter the backend aws region', name: 'BACKEND_AWS_REGION')
                             ]
                         )
 
@@ -125,6 +127,8 @@ pipeline {
                         sh "echo BACKEND_IMAGE_VERSION=${env.BACKEND_IMAGE_VERSION} >> .env.${env.ENV}"
                         sh "echo BACKEND_ENV=${env.ENV} >> .env.${env.ENV}"
                         sh "echo BACKEND_APP_NAME=${env.APP_NAME} >> .env.${env.ENV}"
+                        sh "echo BACKEND_KINESIS_STREAM_NAME=${env.BACKEND_KINESIS_STREAM_NAME} >> .env.${env.ENV}"
+                        sh "echo BACKEND_AWS_REGION=${env.BACKEND_AWS_REGION} >> .env.${env.ENV}"
 
                         echo "File .env.${env.ENV} created"
 
