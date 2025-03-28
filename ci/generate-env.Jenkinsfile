@@ -7,15 +7,17 @@ pipeline {
         BACKEND_IMAGE_NAME = ''
         BACKEND_IMAGE_REPO = ''
         BACKEND_IMAGE_VERSION = ''
+        BACKEND_KINESIS_STREAM_NAME = ''
+        BACKEND_AWS_REGION = ''
         // ERROR
         ERROR = ''
     }
     stages {
         stage("User Input") {
             steps {
-                echo "========EXEC: User Input========"
-                try {
-                    script {
+                script {
+                    echo "========EXEC: User Input========"
+                    try {
                         def userInput = input(
                             message: 'Please provide the required details:',
                             parameters: [
@@ -23,17 +25,15 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the app name', name: 'APP_NAME')
                             ]
                         )
-
                         if (userInput.ENV.isEmpty() || userInput.APP_NAME.isEmpty()) {
                             error('Please provide the required details')
                         }
-
                         env.ENV = userInput.ENV
                         env.APP_NAME = userInput.APP_NAME
+                    } catch (Exception e) {
+                        env.ERROR = e.getMessage()
+                        throw e
                     }
-                } catch (Exception e) {
-                    env.ERROR = e.getMessage()
-                    throw e
                 }
             }
             post {
@@ -50,38 +50,40 @@ pipeline {
         }
         stage("Check bucket") {
             steps {
-				echo "========EXEC: Check bucket========"
-                try {
-                    withCredentials([
-                        [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                        [string(credentialsId: 's3_backend_name', variable: 's3_backend_name')]
-                    ]) {
-                        def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}", returnStatus: true)
-                        if (fileStatus == 0) {
-                            echo "File .env.${env.ENV} exists in bucket."
-                            def userChoice = input(
-                                message: "File .env.${env.ENV} already exists. Do you want to delete it?",
-                                parameters: [
-                                    choice(
-                                        name: 'DELETE_CHOICE',
-                                        choices: "Yes\nNo",
-                                        description: "Select 'Yes' to delete the file, 'No' to abort the build."
-                                    )
-                                ]
-                            )
-                            if (userChoice == "Yes") {
-                                sh "aws s3 rm s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}"
-                                echo "File .env.${env.ENV} deleted from bucket."
+                script {
+                    echo "========EXEC: Check bucket========"
+                    try {
+                        withCredentials([
+                            [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
+                            [string(credentialsId: 's3_backend_name', variable: 's3_backend_name')]
+                        ]) {
+                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${env.ENV}", returnStatus: true)
+                            if (fileStatus == 0) {
+                                echo "File .env.${env.ENV} exists in bucket."
+                                def userChoice = input(
+                                    message: "File .env.${env.ENV} already exists. Do you want to delete it?",
+                                    parameters: [
+                                        choice(
+                                            name: 'DELETE_CHOICE',
+                                            choices: "Yes\nNo",
+                                            description: "Select 'Yes' to delete the file, 'No' to abort the build."
+                                        )
+                                    ]
+                                )
+                                if (userChoice == "Yes") {
+                                    sh "aws s3 rm s3://${s3_backend_name}/envs/.env.${env.ENV}"
+                                    echo "File .env.${env.ENV} deleted from bucket."
+                                } else {
+                                    error("User chose to abort and not delete the file")
+                                }
                             } else {
-                                error("User chose to abort and not delete the file")
+                                echo "File .env.${env.ENV} does not exist. Proceeding with the pipeline."
                             }
-                        } else {
-                            echo "File .env.${env.ENV} does not exist. Proceeding with the pipeline."
                         }
+                    } catch (Exception e) {
+                        env.ERROR = e.getMessage()
+                        throw e
                     }
-                } catch (Exception e) {
-                    env.ERROR = e.getMessage()
-                    throw e
                 }
             }
             post {
@@ -96,9 +98,9 @@ pipeline {
         }
         stage("Generate .env file and upload") {
             steps {
-				echo "========EXEC: Generate .env file and upload========"
-                try {
-                    script {
+                script {
+                    echo "========EXEC: Generate .env file and upload========"
+                    try {
                         def userInput = input(
                             message: 'Please provide the required details:',
                             parameters: [
@@ -120,6 +122,8 @@ pipeline {
                         env.BACKEND_IMAGE_NAME = userInput.BACKEND_IMAGE_NAME
                         env.BACKEND_IMAGE_REPO = userInput.BACKEND_IMAGE_REPO
                         env.BACKEND_IMAGE_VERSION = userInput.BACKEND_IMAGE_VERSION
+                        env.BACKEND_KINESIS_STREAM_NAME = userInput.BACKEND_KINESIS_STREAM_NAME
+                        env.BACKEND_AWS_REGION = userInput.BACKEND_AWS_REGION
 
                         sh "touch .env.${env.ENV}"
                         sh "echo BACKEND_IMAGE_NAME=${env.BACKEND_IMAGE_NAME} >> .env.${env.ENV}"
@@ -136,18 +140,18 @@ pipeline {
                             [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
                             [string(credentialsId: 's3_backend_name', variable: 's3_backend_name')]
                         ]) {
-                            sh "aws s3 cp .env.${env.ENV} s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}"
-                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name_NAME}/envs/.env.${env.ENV}", returnStatus: true)
+                            sh "aws s3 cp .env.${env.ENV} s3://${s3_backend_name}/envs/.env.${env.ENV}"
+                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${env.ENV}", returnStatus: true)
                             if (fileStatus == 0) {
                                 echo "File .env.${env.ENV} uploaded to bucket"
                             } else {
                                 error("File .env.${env.ENV} not uploaded to bucket")
                             }
                         }
+                    } catch (Exception e) {
+                        env.ERROR = e.getMessage()
+                        throw e
                     }
-                } catch (Exception e) {
-                    env.ERROR = e.getMessage()
-                    throw e
                 }
             }
             post {
