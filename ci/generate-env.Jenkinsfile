@@ -1,6 +1,7 @@
 pipeline {
     agent any
     environment {
+        // Define variables to be used later.
         ENV = ''
         APP_NAME = ''
         BACKEND_IMAGE_NAME = ''
@@ -23,13 +24,13 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the app name', name: 'APP_NAME')
                             ]
                         )
-
+                        echo "User Input returned: ${userInput}"
                         if (userInput['ENV'].isEmpty() || userInput['APP_NAME'].isEmpty()) {
                             error('Please provide the required details')
                         }
-                        env.ENV = inputValue['ENV']
-                        env.APP_NAME = inputValue['APP_NAME']
-
+                        // Correctly assign using "userInput", not "inputValue".
+                        env.ENV = userInput['ENV']
+                        env.APP_NAME = userInput['APP_NAME']
                     } catch (Exception e) {
                         env.ERROR = e.getMessage()
                         throw e
