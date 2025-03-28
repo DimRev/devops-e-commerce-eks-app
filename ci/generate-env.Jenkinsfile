@@ -1,15 +1,17 @@
+def ENV = ''
+def APP_NAME = ''
+def BACKEND_IMAGE_NAME = ''
+def BACKEND_IMAGE_REPO = ''
+def BACKEND_IMAGE_VERSION = ''
+def BACKEND_KINESIS_STREAM_NAME = ''
+def BACKEND_AWS_REGION = ''
+def ERROR = ''
+
 pipeline {
     agent any
     environment {
         // Define variables to be used later.
-        ENV = ''
-        APP_NAME = ''
-        BACKEND_IMAGE_NAME = ''
-        BACKEND_IMAGE_REPO = ''
-        BACKEND_IMAGE_VERSION = ''
-        BACKEND_KINESIS_STREAM_NAME = ''
-        BACKEND_AWS_REGION = ''
-        ERROR = ''
+
     }
     stages {
         stage("User Input") {
@@ -29,10 +31,10 @@ pipeline {
                             error('Please provide the required details')
                         }
                         // Correctly assign using "userInput", not "inputValue".
-                        env.ENV = userInput['ENV']
-                        env.APP_NAME = userInput['APP_NAME']
+                        ENV = userInput['ENV']
+                        APP_NAME = userInput['APP_NAME']
                     } catch (Exception e) {
-                        env.ERROR = e.getMessage()
+                        ERROR = e.getMessage()
                         throw e
                     }
                 }
@@ -40,12 +42,12 @@ pipeline {
             post {
                 success {
                     echo "========SUCCESS: User Input========"
-                    echo "ENV: ${env.ENV}"
-                    echo "APP_NAME: ${env.APP_NAME}"
+                    echo "ENV: ${ENV}"
+                    echo "APP_NAME: ${APP_NAME}"
                 }
                 failure {
                     echo "========FAILURE: User Input========"
-                    echo "ERROR: ${env.ERROR}"
+                    echo "ERROR: ${ERROR}"
                 }
             }
         }
@@ -58,11 +60,11 @@ pipeline {
                             [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
                             [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 's3_backend_name']
                         ]) {
-                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${env.ENV}", returnStatus: true)
+                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${ENV}", returnStatus: true)
                             if (fileStatus == 0) {
-                                echo "File .env.${env.ENV} exists in bucket."
+                                echo "File .env.${ENV} exists in bucket."
                                 def userChoice = input(
-                                    message: "File .env.${env.ENV} already exists. Do you want to delete it?",
+                                    message: "File .env.${ENV} already exists. Do you want to delete it?",
                                     parameters: [
                                         choice(
                                             name: 'DELETE_CHOICE',
@@ -72,17 +74,17 @@ pipeline {
                                     ]
                                 )
                                 if (userChoice == "Yes") {
-                                    sh "aws s3 rm s3://${s3_backend_name}/envs/.env.${env.ENV}"
-                                    echo "File .env.${env.ENV} deleted from bucket."
+                                    sh "aws s3 rm s3://${s3_backend_name}/envs/.env.${ENV}"
+                                    echo "File .env.${ENV} deleted from bucket."
                                 } else {
                                     error("User chose to abort and not delete the file")
                                 }
                             } else {
-                                echo "File .env.${env.ENV} does not exist. Proceeding with the pipeline."
+                                echo "File .env.${ENV} does not exist. Proceeding with the pipeline."
                             }
                         }
                     } catch (Exception e) {
-                        env.ERROR = e.getMessage()
+                        ERROR = e.getMessage()
                         throw e
                     }
                 }
@@ -93,7 +95,7 @@ pipeline {
                 }
                 failure {
                     echo "========FAILURE: Check bucket========"
-                    echo "ERROR: ${env.ERROR}"
+                    echo "ERROR: ${ERROR}"
                 }
             }
         }
@@ -120,51 +122,51 @@ pipeline {
                         ) {
                             error('Please provide the required details')
                         }
-                        env.BACKEND_IMAGE_NAME = userInput['BACKEND_IMAGE_NAME']
-                        env.BACKEND_IMAGE_REPO = userInput['BACKEND_IMAGE_REPO']
-                        env.BACKEND_IMAGE_VERSION = userInput['BACKEND_IMAGE_VERSION']
-                        env.BACKEND_KINESIS_STREAM_NAME = userInput['BACKEND_KINESIS_STREAM_NAME']
-                        env.BACKEND_AWS_REGION = userInput['BACKEND_AWS_REGION']
+                        BACKEND_IMAGE_NAME = userInput['BACKEND_IMAGE_NAME']
+                        BACKEND_IMAGE_REPO = userInput['BACKEND_IMAGE_REPO']
+                        BACKEND_IMAGE_VERSION = userInput['BACKEND_IMAGE_VERSION']
+                        BACKEND_KINESIS_STREAM_NAME = userInput['BACKEND_KINESIS_STREAM_NAME']
+                        BACKEND_AWS_REGION = userInput['BACKEND_AWS_REGION']
 
-                        sh "touch .env.${env.ENV}"
-                        sh "echo BACKEND_IMAGE_NAME=${env.BACKEND_IMAGE_NAME} >> .env.${env.ENV}"
-                        sh "echo BACKEND_IMAGE_REPO=${env.BACKEND_IMAGE_REPO} >> .env.${env.ENV}"
-                        sh "echo BACKEND_IMAGE_VERSION=${env.BACKEND_IMAGE_VERSION} >> .env.${env.ENV}"
-                        sh "echo BACKEND_ENV=${env.ENV} >> .env.${env.ENV}"
-                        sh "echo BACKEND_APP_NAME=${env.APP_NAME} >> .env.${env.ENV}"
-                        sh "echo BACKEND_KINESIS_STREAM_NAME=${env.BACKEND_KINESIS_STREAM_NAME} >> .env.${env.ENV}"
-                        sh "echo BACKEND_AWS_REGION=${env.BACKEND_AWS_REGION} >> .env.${env.ENV}"
+                        sh "touch .env.${ENV}"
+                        sh "echo BACKEND_IMAGE_NAME=${BACKEND_IMAGE_NAME} >> .env.${ENV}"
+                        sh "echo BACKEND_IMAGE_REPO=${BACKEND_IMAGE_REPO} >> .env.${ENV}"
+                        sh "echo BACKEND_IMAGE_VERSION=${BACKEND_IMAGE_VERSION} >> .env.${ENV}"
+                        sh "echo BACKEND_ENV=${ENV} >> .env.${ENV}"
+                        sh "echo BACKEND_APP_NAME=${APP_NAME} >> .env.${ENV}"
+                        sh "echo BACKEND_KINESIS_STREAM_NAME=${BACKEND_KINESIS_STREAM_NAME} >> .env.${ENV}"
+                        sh "echo BACKEND_AWS_REGION=${BACKEND_AWS_REGION} >> .env.${ENV}"
 
-                        echo "File .env.${env.ENV} created"
+                        echo "File .env.${ENV} created"
 
                         withCredentials([
                             [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
                             [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 's3_backend_name']
                         ]) {
-                            sh "aws s3 cp .env.${env.ENV} s3://${s3_backend_name}/envs/.env.${env.ENV}"
-                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${env.ENV}", returnStatus: true)
+                            sh "aws s3 cp .env.${ENV} s3://${s3_backend_name}/envs/.env.${ENV}"
+                            def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${ENV}", returnStatus: true)
                             if (fileStatus == 0) {
-                                echo "File .env.${env.ENV} uploaded to bucket"
+                                echo "File .env.${ENV} uploaded to bucket"
                             } else {
-                                error("File .env.${env.ENV} not uploaded to bucket")
+                                error("File .env.${ENV} not uploaded to bucket")
                             }
                         }
                     } catch (Exception e) {
-                        env.ERROR = e.getMessage()
+                        ERROR = e.getMessage()
                         throw e
                     }
                 }
             }
             post {
                 always {
-                    sh "rm -f .env.${env.ENV}"
+                    sh "rm -f .env.${ENV}"
                 }
                 success {
                     echo "========SUCCESS: Generate .env file and upload========"
                 }
                 failure {
                     echo "========FAILURE: Generate .env file and upload========"
-                    echo "ERROR: ${env.ERROR}"
+                    echo "ERROR: ${ERROR}"
                 }
             }
         }
