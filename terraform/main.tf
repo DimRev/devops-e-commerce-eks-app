@@ -1,3 +1,7 @@
+provider "aws" {
+  region  = "us-east-1"
+  profile = "e-commerce"
+}
 resource "aws_key_pair" "key_pair" {
   key_name   = "${var.environment}-${var.app_name}-key"
   public_key = file("~/.ssh/id_rsa.pub")
@@ -37,7 +41,6 @@ module "vpc" {
     Env       = var.environment
   }
 }
-
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.31"
@@ -63,7 +66,8 @@ module "eks" {
     }
   }
 
-  cluster_endpoint_public_access = true
+  cluster_endpoint_public_access           = true
+  enable_cluster_creator_admin_permissions = true
 
   tags = {
     Name      = "${var.environment}-${var.app_name}-eks"
@@ -83,7 +87,7 @@ module "log_data_stream" {
   app_name    = var.app_name
   environment = var.environment
 
-  eks_node_iam_name = module.eks.node_iam_role_name
+  eks_cluster_iam_role_name = module.eks.cluster_iam_role_name
 }
 
 module "jenkins" {

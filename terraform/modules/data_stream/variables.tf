@@ -48,7 +48,7 @@ variable "app_name" {
   type        = string
 }
 
-variable "eks_node_iam_name" {
+variable "eks_cluster_iam_role_name" {
   description = "IAM Role NAME for EKS Nodes"
   type        = string
 }

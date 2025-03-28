@@ -4,7 +4,19 @@
 
 ![Architecture](./assets/architecture.png)
 
+## Prerequisites
+
+- AWS IAM User
+- AWS CLI
+- S3 Backend bucket
+
 ## Setup
+
+0. Define the aws cli profile for the AWS IAM User, **IMPORTANT** The same user needs to be used in the CI/CD pipelines in jenkins.
+
+```bash
+aws configure --profile e-commerce
+```
 
 1. Apply the terraform infra
 
@@ -25,31 +37,24 @@ kinesis_stream_arn = ""
 vpc_id = ""
 ```
 
-3. Connect to Jenkins using the Jenkins IP on port 8080, `http://<jenkins-ip>:8080`
+3. Open the Jenkins UI in the browser `http://<jenkins-ip>:8080`
+   ![Jenkins UI](./assets/jenkins-unlock.png)
 
-4. Init the Jenkins with admin credentials
+4. SSH into the Jenkins instance and cat the initial admin password
 
-![Jenkins Init](./assets/jenkins-unlock.png)
+```bash
+ssh ec2-user@<jenkins-ip>
+cat /var/lib/jenkins/secrets/initialAdminPassword
+```
 
-5. Install the AWS Credentials Plugin
+5. Setup a jenkins user and install the default plugins
 
-![Jenkins AWS Credentials Plugin](./assets/jenkins-aws-creds.png)
+6. Install AWS Credentials Plugin
+   ![AWS Credentials Plugin](./assets/jenkins-aws-creds.png)
 
-6. Create IAM & Jenkins Credentials, When creating the credentials in jenkins **IMPORTANT** make the id of the credentials as `aws_credentials`, add the `s3_backend_name` as the text secret with the name of the backend bucket.
+7. Setup AWS credentials and s3 bucket as secrets, it is important to use the, AWS Credentials type ID: `aws_credentials` and secret text type with the ID: `s3_backend_name`.
+   ![AWS Credentials Plugin](./assets/jenkins-global-creds.png)
 
-7. Create a pipeline and connect it to the repo, target the CI in `ci/generate-env.Jenkinsfile`:
+8. Create a new jenkins pipeline and point it to the `ci/generate-env.Jenkinsfile` file.
 
-![Generate env 1](./assets/jenkins-generate-env-1.png)
-Run the pipeline
-
-![Generate env 2](./assets/jenkins-generate-env-2.png)
-Provide ENV and APP_NAME
-
-![Generate env 3](./assets/jenkins-generate-env-3.png)
-Continue to run the app, checking if the env already exist in the bucket
-
-![Generate env 4](./assets/jenkins-generate-env-4.png)
-Provide the other required env details
-
-![Generate env 5](./assets/jenkins-generate-env-5.png)
-Env is generated in the bucket
+9. Build the pipeline and provide the required details.

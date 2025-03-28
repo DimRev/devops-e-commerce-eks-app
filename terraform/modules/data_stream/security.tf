@@ -160,8 +160,12 @@ resource "aws_iam_policy" "eks_kinesis_policy" {
   }
 }
 
+data "aws_iam_role" "eks_role" {
+  name = var.eks_cluster_iam_role_name
+}
+
 resource "aws_iam_role_policy_attachment" "eks_kinesis_attach" {
-  role       = var.eks_node_iam_name
+  role       = data.aws_iam_role.eks_role.name
   policy_arn = aws_iam_policy.eks_kinesis_policy.arn
 }
 
