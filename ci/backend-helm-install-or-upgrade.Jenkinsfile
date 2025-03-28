@@ -22,11 +22,11 @@ pipeline {
                                     string(defaultValue: '', description: 'Enter the environment', name: 'ENV')
                                 ]
                             )
-                            if (userInput['ENV'].isEmpty()) {
+                            if (userInput.get("ENV").isEmpty()) {
                                 error('Please provide the required details')
                             }
-                            // Update our global variable
-                            ENV = userInput['ENV']
+                            // Update our global variable using .get() instead of []
+                            ENV = userInput.get("ENV")
 
                             def envExists = sh(
                                 script: "aws s3 ls s3://${S3_BACKEND_NAME}/envs/.env.${ENV}",
