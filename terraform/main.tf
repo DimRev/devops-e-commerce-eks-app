@@ -45,14 +45,14 @@ module "eks" {
   cluster_name    = "${var.environment}-${var.app_name}-eks"
   cluster_version = "1.27"
 
-  vpc_id     = module.vpc.default_vpc_id
+  vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
   eks_managed_node_groups = {
     eks_nodes = {
-      desired_capacity = var.eks_nodes_desired_capacity
-      max_size         = var.eks_nodes_max_size
-      min_size         = var.eks_nodes_min_size
+      desired_size = var.eks_nodes_desired_capacity
+      max_size     = var.eks_nodes_max_size
+      min_size     = var.eks_nodes_min_size
 
       instance_types = ["t3.medium"]
 
@@ -91,7 +91,7 @@ module "jenkins" {
 
   key_pair_name = aws_key_pair.key_pair.key_name
   subnet_id     = module.vpc.public_subnets[0]
-  vpc_id        = module.vpc.default_vpc_id
+  vpc_id        = module.vpc.vpc_id
 
   app_name = var.app_name
 

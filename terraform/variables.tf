@@ -30,7 +30,7 @@ variable "eks_nodes_max_size" {
 variable "eks_nodes_min_size" {
   description = "The minimum capacity of the EKS nodes."
   type        = number
-  default     = 2
+  default     = 3
 }
 
 variable "app_name" {

@@ -134,7 +134,7 @@ resource "aws_iam_role_policy_attachment" "kinesis_firehose_attach" {
 #############################
 
 data "aws_iam_openid_connect_provider" "oidc" {
-  arn = var.eks_cluster_oidc_issuer_url
+  url = var.eks_cluster_oidc_issuer_url
 }
 
 resource "aws_iam_role" "eks_kinesis_access" {
