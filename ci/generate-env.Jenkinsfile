@@ -1,17 +1,19 @@
-def ENV = ''
-def APP_NAME = ''
-def BACKEND_IMAGE_NAME = ''
-def BACKEND_IMAGE_REPO = ''
-def BACKEND_IMAGE_VERSION = ''
-def BACKEND_KINESIS_STREAM_NAME = ''
-def BACKEND_AWS_REGION = ''
-def ERROR = ''
+// Import the annotation so our globals persist between stages.
+import groovy.transform.Field
+
+@Field def ENV = ''
+@Field def APP_NAME = ''
+@Field def BACKEND_IMAGE_NAME = ''
+@Field def BACKEND_IMAGE_REPO = ''
+@Field def BACKEND_IMAGE_VERSION = ''
+@Field def BACKEND_KINESIS_STREAM_NAME = ''
+@Field def BACKEND_AWS_REGION = ''
+@Field def ERROR = ''
 
 pipeline {
     agent any
     environment {
-        // Define variables to be used later.
-
+        // No mutable variables are defined here so that our global vars remain mutable.
     }
     stages {
         stage("User Input") {
@@ -30,7 +32,7 @@ pipeline {
                         if (userInput['ENV'].isEmpty() || userInput['APP_NAME'].isEmpty()) {
                             error('Please provide the required details')
                         }
-                        // Correctly assign using "userInput", not "inputValue".
+                        // Update our global variables
                         ENV = userInput['ENV']
                         APP_NAME = userInput['APP_NAME']
                     } catch (Exception e) {
