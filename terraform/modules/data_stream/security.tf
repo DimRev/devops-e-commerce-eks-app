@@ -133,53 +133,22 @@ resource "aws_iam_role_policy_attachment" "kinesis_firehose_attach" {
 # IAM Policy for EKS Access
 #############################
 
-data "aws_iam_openid_connect_provider" "oidc" {
-  url = var.eks_cluster_oidc_issuer_url
-}
-
-resource "aws_iam_role" "eks_kinesis_access" {
-  name = "${var.environment}-${var.app_name}-${var.name_prefix}-eks-kinesis-access-role"
-
-  assume_role_policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
-      {
-        "Effect" : "Allow",
-        "Principal" : {
-          "Federated" : data.aws_iam_openid_connect_provider.oidc.arn
-        },
-        "Action" : "sts:AssumeRoleWithWebIdentity",
-        "Condition" : {
-          "StringEquals" : {
-            "${replace(data.aws_iam_openid_connect_provider.oidc.url, "https://", "")}:sub" : "system:serviceaccount:default:kinesis-access"
-          }
-        }
-      }
-    ]
-  })
-
-  tags = {
-    Terraform   = "true"
-    Environment = var.environment
-    Name        = "${var.environment}-${var.app_name}-${var.name_prefix}-eks-kinesis-access-role"
-  }
-}
-
 resource "aws_iam_policy" "eks_kinesis_policy" {
-  name        = "${var.environment}-${var.app_name}-${var.name_prefix}-eks-kinesis-access-policy"
-  description = "Policy to allow Kinesis stream access"
-
+  name = "${var.environment}-${var.app_name}-${var.name_prefix}-eks-kinesis-access-policy"
   policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
+    Version : "2012-10-17",
+    Statement : [
       {
-        "Effect" : "Allow",
-        "Action" : [
+        Effect : "Allow",
+        Action : [
           "kinesis:PutRecord",
           "kinesis:PutRecordBatch",
-          "kinesis:DescribeStream"
+          "kinesis:DescribeStream",
+          "kinesis:GetRecords",
+          "kinesis:GetShardIterator",
+          "kinesis:ListShards"
         ],
-        "Resource" : "${aws_kinesis_stream.this.arn}"
+        Resource : aws_kinesis_stream.this.arn
       }
     ]
   })
@@ -192,6 +161,8 @@ resource "aws_iam_policy" "eks_kinesis_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "eks_kinesis_attach" {
-  role       = aws_iam_role.eks_kinesis_access.name
+  role       = var.eks_node_iam_name
   policy_arn = aws_iam_policy.eks_kinesis_policy.arn
 }
+
+

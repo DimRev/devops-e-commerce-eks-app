@@ -43,7 +43,7 @@ module "eks" {
   version = "~> 20.31"
 
   cluster_name    = "${var.environment}-${var.app_name}-eks"
-  cluster_version = "1.27"
+  cluster_version = "1.28"
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
@@ -83,7 +83,7 @@ module "log_data_stream" {
   app_name    = var.app_name
   environment = var.environment
 
-  eks_cluster_oidc_issuer_url = module.eks.cluster_oidc_issuer_url
+  eks_node_iam_name = module.eks.node_iam_role_name
 }
 
 module "jenkins" {
