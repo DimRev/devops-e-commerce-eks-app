@@ -1,8 +1,8 @@
 import groovy.transform.Field
 
 @Field def ENV = ''
-@Field def APP_NAME = ''
 @Field def ERROR = ''
+@Field def APP_NAME = ''
 
 pipeline {
     agent any
@@ -12,30 +12,18 @@ pipeline {
                 script {
                     echo "========EXEC: Setup Environment========"
                     try {
-                        withCredentials([
-                            [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                            [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 'S3_BACKEND_NAME']
-                        ]) {
-                            def userInput = input(
-                                message: 'Please provide the required details:',
-                                parameters: [
-                                    string(defaultValue: '', description: 'Enter the environment', name: 'ENV')
-                                ]
-                            )
-                            if (userInput.get("ENV").isEmpty()) {
-                                error('Please provide the required details')
-                            }
-                            // Update our global variable using .get() instead of []
-                            ENV = userInput.get("ENV")
-
-                            def envExists = sh(
-                                script: "aws s3 ls s3://${S3_BACKEND_NAME}/envs/.env.${ENV}",
-                                returnStatus: true
-                            )
-                            if (envExists != 0) {
-                                error("File .env.${ENV} does not exist in bucket")
-                            }
+                        def userInput = input(
+                            message: 'Please provide the required details:',
+                            parameters: [
+                                string(defaultValue: '', description: 'Enter the environment', name: 'ENV')
+                            ]
+                        )
+                        echo "User Input returned: ${userInput}"
+                        if (userInput['ENV'].isEmpty() || userInput['APP_NAME'].isEmpty()) {
+                            error('Please provide the required details')
                         }
+                        // Update our global variables
+                        ENV = userInput['ENV']
                     } catch (Exception e) {
                         ERROR = e.getMessage()
                         throw e
@@ -82,6 +70,43 @@ pipeline {
                 }
                 failure {
                     echo "========FAILURE: Checkout code========"
+                    echo "ERROR: ${ERROR}"
+                }
+            }
+        }
+        stage("Connect to EKS") {
+            steps {
+                script {
+                    echo "========EXEC: Connect to EKS========"
+                    try {
+                        withCredentials([
+                            [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
+                            [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 'S3_BACKEND_NAME']
+                        ]) {
+                            sh "aws s3 cp s3://${S3_BACKEND_NAME}/envs/.env.${ENV} .env"
+                            def eksClusterNameValue = sh(
+                                script: "cat .env | grep EKS_CLUSTER_NAME | cut -d '=' -f 2",
+                                returnStdout: true
+                            ).trim()
+                            def eksClusterRegionValue = sh(
+                                script: "cat .env | grep BACKEND_AWS_REGION | cut -d '=' -f 2",
+                                returnStdout: true
+                            ).trim()
+
+                            sh "aws eks update-kubeconfig --name ${eksClusterNameValue} --region ${eksClusterRegionValue}"
+                        }
+                    } catch (Exception e) {
+                        ERROR = e.getMessage()
+                        throw e
+                    }
+                }
+            }
+            post {
+                success {
+                    echo "========SUCCESS: Connect to EKS========"
+                }
+                failure {
+                    echo "========FAILURE: Connect to EKS========"
                     echo "ERROR: ${ERROR}"
                 }
             }
