@@ -8,6 +8,7 @@ import groovy.transform.Field
 @Field def BACKEND_IMAGE_VERSION = ''
 @Field def BACKEND_KINESIS_STREAM_NAME = ''
 @Field def BACKEND_AWS_REGION = ''
+@Field def EKS_CLUSTER_NAME = ''
 @Field def ERROR = ''
 
 pipeline {
