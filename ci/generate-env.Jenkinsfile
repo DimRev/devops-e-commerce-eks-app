@@ -23,12 +23,13 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the app name', name: 'APP_NAME')
                             ]
                         )
-                        echo "User Input returned: ${userInput}"
-                        env.ENV = userInput['ENV']
-                        env.APP_NAME = userInput['APP_NAME']
-                        if (!env.ENV || !env.APP_NAME) {
+
+                        if (userInput['ENV'].isEmpty() || userInput['APP_NAME'].isEmpty()) {
                             error('Please provide the required details')
                         }
+                        env.ENV = inputValue['ENV']
+                        env.APP_NAME = inputValue['APP_NAME']
+
                     } catch (Exception e) {
                         env.ERROR = e.getMessage()
                         throw e
