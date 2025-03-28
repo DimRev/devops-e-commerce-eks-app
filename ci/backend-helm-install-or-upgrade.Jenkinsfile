@@ -1,8 +1,8 @@
 import groovy.transform.Field
 
 @Field def ENV = ''
-@Field def ERROR = ''
 @Field def APP_NAME = ''
+@Field def ERROR = ''
 
 pipeline {
     agent any
@@ -19,11 +19,25 @@ pipeline {
                             ]
                         )
                         echo "User Input returned: ${userInput}"
-                        if (userInput['ENV'].isEmpty() || userInput['APP_NAME'].isEmpty()) {
+                        if (userInput.get("ENV").isEmpty()) {
                             error('Please provide the required details')
                         }
-                        // Update our global variables
-                        ENV = userInput['ENV']
+                        // Update our global variable
+                        ENV = userInput.get("ENV")
+
+                        // Check if the environment file exists in S3
+                        withCredentials([
+                            [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
+                            [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 'S3_BACKEND_NAME']
+                        ]) {
+                            def envExists = sh(
+                                script: "aws s3 ls s3://${S3_BACKEND_NAME}/envs/.env.${ENV}",
+                                returnStatus: true
+                            )
+                            if (envExists != 0) {
+                                error("File .env.${ENV} does not exist in bucket")
+                            }
+                        }
                     } catch (Exception e) {
                         ERROR = e.getMessage()
                         throw e
