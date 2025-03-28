@@ -137,6 +137,7 @@ pipeline {
                         sh "echo BACKEND_APP_NAME=${APP_NAME} >> .env.${ENV}"
                         sh "echo BACKEND_KINESIS_STREAM_NAME=${BACKEND_KINESIS_STREAM_NAME} >> .env.${ENV}"
                         sh "echo BACKEND_AWS_REGION=${BACKEND_AWS_REGION} >> .env.${ENV}"
+                        sh "echo EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME} >> .env.${ENV}"
 
                         echo "File .env.${ENV} created"
 
