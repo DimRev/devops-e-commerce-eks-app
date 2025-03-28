@@ -120,7 +120,11 @@ pipeline {
                         if (
                             userInput['BACKEND_IMAGE_NAME'].isEmpty() ||
                             userInput['BACKEND_IMAGE_REPO'].isEmpty() ||
-                            userInput['BACKEND_IMAGE_VERSION'].isEmpty()
+                            userInput['BACKEND_IMAGE_VERSION'].isEmpty()||
+                            userInput['BACKEND_KINESIS_STREAM_NAME'].isEmpty()||
+                            userInput['BACKEND_AWS_REGION'].isEmpty()||
+                            userInput['EKS_CLUSTER_NAME'].isEmpty()
+
                         ) {
                             error('Please provide the required details')
                         }
@@ -129,6 +133,7 @@ pipeline {
                         BACKEND_IMAGE_VERSION = userInput['BACKEND_IMAGE_VERSION']
                         BACKEND_KINESIS_STREAM_NAME = userInput['BACKEND_KINESIS_STREAM_NAME']
                         BACKEND_AWS_REGION = userInput['BACKEND_AWS_REGION']
+                        EKS_CLUSTER_NAME = userInput['EKS_CLUSTER_NAME']
 
                         sh "touch .env.${ENV}"
                         sh "echo BACKEND_IMAGE_NAME=${BACKEND_IMAGE_NAME} >> .env.${ENV}"
