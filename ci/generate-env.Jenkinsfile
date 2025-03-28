@@ -1,7 +1,6 @@
 pipeline {
     agent any
     environment {
-        // ENVS
         ENV = ''
         APP_NAME = ''
         BACKEND_IMAGE_NAME = ''
@@ -9,7 +8,6 @@ pipeline {
         BACKEND_IMAGE_VERSION = ''
         BACKEND_KINESIS_STREAM_NAME = ''
         BACKEND_AWS_REGION = ''
-        // ERROR
         ERROR = ''
     }
     stages {
@@ -25,11 +23,12 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the app name', name: 'APP_NAME')
                             ]
                         )
-                        if (userInput.ENV.isEmpty() || userInput.APP_NAME.isEmpty()) {
+                        echo "User Input returned: ${userInput}"
+                        env.ENV = userInput['ENV']
+                        env.APP_NAME = userInput['APP_NAME']
+                        if (!env.ENV || !env.APP_NAME) {
                             error('Please provide the required details')
                         }
-                        env.ENV = userInput.ENV
-                        env.APP_NAME = userInput.APP_NAME
                     } catch (Exception e) {
                         env.ERROR = e.getMessage()
                         throw e
@@ -55,7 +54,7 @@ pipeline {
                     try {
                         withCredentials([
                             [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                            [string(credentialsId: 's3_backend_name', variable: 's3_backend_name')]
+                            [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 's3_backend_name']
                         ]) {
                             def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${env.ENV}", returnStatus: true)
                             if (fileStatus == 0) {
@@ -111,19 +110,19 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the backend aws region', name: 'BACKEND_AWS_REGION')
                             ]
                         )
-
+                        echo "Generate .env file input: ${userInput}"
                         if (
-                            userInput.BACKEND_IMAGE_NAME.isEmpty() ||
-                            userInput.BACKEND_IMAGE_REPO.isEmpty() ||
-                            userInput.BACKEND_IMAGE_VERSION.isEmpty()
+                            userInput['BACKEND_IMAGE_NAME'].isEmpty() ||
+                            userInput['BACKEND_IMAGE_REPO'].isEmpty() ||
+                            userInput['BACKEND_IMAGE_VERSION'].isEmpty()
                         ) {
                             error('Please provide the required details')
                         }
-                        env.BACKEND_IMAGE_NAME = userInput.BACKEND_IMAGE_NAME
-                        env.BACKEND_IMAGE_REPO = userInput.BACKEND_IMAGE_REPO
-                        env.BACKEND_IMAGE_VERSION = userInput.BACKEND_IMAGE_VERSION
-                        env.BACKEND_KINESIS_STREAM_NAME = userInput.BACKEND_KINESIS_STREAM_NAME
-                        env.BACKEND_AWS_REGION = userInput.BACKEND_AWS_REGION
+                        env.BACKEND_IMAGE_NAME = userInput['BACKEND_IMAGE_NAME']
+                        env.BACKEND_IMAGE_REPO = userInput['BACKEND_IMAGE_REPO']
+                        env.BACKEND_IMAGE_VERSION = userInput['BACKEND_IMAGE_VERSION']
+                        env.BACKEND_KINESIS_STREAM_NAME = userInput['BACKEND_KINESIS_STREAM_NAME']
+                        env.BACKEND_AWS_REGION = userInput['BACKEND_AWS_REGION']
 
                         sh "touch .env.${env.ENV}"
                         sh "echo BACKEND_IMAGE_NAME=${env.BACKEND_IMAGE_NAME} >> .env.${env.ENV}"
@@ -138,7 +137,7 @@ pipeline {
 
                         withCredentials([
                             [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                            [string(credentialsId: 's3_backend_name', variable: 's3_backend_name')]
+                            [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 's3_backend_name']
                         ]) {
                             sh "aws s3 cp .env.${env.ENV} s3://${s3_backend_name}/envs/.env.${env.ENV}"
                             def fileStatus = sh(script: "aws s3 ls s3://${s3_backend_name}/envs/.env.${env.ENV}", returnStatus: true)
