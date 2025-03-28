@@ -104,7 +104,7 @@ pipeline {
                             parameters: [
                                 string(defaultValue: '', description: 'Enter the backend image name', name: 'BACKEND_IMAGE_NAME'),
                                 string(defaultValue: '', description: 'Enter the backend image repository', name: 'BACKEND_IMAGE_REPO'),
-                                string(defaultValue: '', description: 'Enter the backend image version', name: 'BACKEND_IMAGE_VERSION')
+                                string(defaultValue: '', description: 'Enter the backend image version', name: 'BACKEND_IMAGE_VERSION'),
                                 string(defaultValue: '', description: 'Enter the backend kinesis stream name', name: 'BACKEND_KINESIS_STREAM_NAME'),
                                 string(defaultValue: '', description: 'Enter the backend aws region', name: 'BACKEND_AWS_REGION')
                             ]
