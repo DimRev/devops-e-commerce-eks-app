@@ -36,3 +36,20 @@ vpc_id = ""
 ![Jenkins AWS Credentials Plugin](./assets/jenkins-aws-creds.png)
 
 6. Create IAM & Jenkins Credentials, When creating the credentials in jenkins **IMPORTANT** make the id of the credentials as `aws_credentials`, add the `s3_backend_name` as the text secret with the name of the backend bucket.
+
+7. Create a pipeline and connect it to the repo, target the CI in `ci/generate-env.Jenkinsfile`:
+
+![Generate env 1](./assets/jenkins-generate-env-1.png)
+Run the pipeline
+
+![Generate env 2](./assets/jenkins-generate-env-2.png)
+Provide ENV and APP_NAME
+
+![Generate env 3](./assets/jenkins-generate-env-3.png)
+Continue to run the app, checking if the env already exist in the bucket
+
+![Generate env 4](./assets/jenkins-generate-env-4.png)
+Provide the other required env details
+
+![Generate env 5](./assets/jenkins-generate-env-5.png)
+Env is generated in the bucket
