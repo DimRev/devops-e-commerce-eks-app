@@ -12,9 +12,7 @@ import groovy.transform.Field
 
 pipeline {
     agent any
-    environment {
-        // No mutable variables are defined here so that our global vars remain mutable.
-    }
+
     stages {
         stage("User Input") {
             steps {
