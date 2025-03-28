@@ -12,6 +12,7 @@ pipeline {
                 script {
                     echo "========EXEC: Setup Environment========"
                     try {
+                        // Since we only ask for one parameter, input returns a String.
                         def userInput = input(
                             message: 'Please provide the required details:',
                             parameters: [
@@ -19,13 +20,13 @@ pipeline {
                             ]
                         )
                         echo "User Input returned: ${userInput}"
-                        if (userInput.get("ENV").isEmpty()) {
+                        if (userInput == null || userInput.trim().isEmpty()) {
                             error('Please provide the required details')
                         }
-                        // Update our global variable
-                        ENV = userInput.get("ENV")
+                        // Set the global variable directly.
+                        ENV = userInput
 
-                        // Check if the environment file exists in S3
+                        // Check if the environment file exists in S3.
                         withCredentials([
                             [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
                             [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 'S3_BACKEND_NAME']
