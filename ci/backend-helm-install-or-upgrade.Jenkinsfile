@@ -149,7 +149,7 @@ EOF
                             // Use the temporary profile to update kubeconfig.
                             sh "aws eks update-kubeconfig --name ${eksClusterNameValue} --region ${eksClusterRegionValue} --profile e-commerce"
 
-                            sh "kubectl config use-context e-commerce"
+                            sh "kubectl config get-contexts"
                             timeout(time: 30, unit: 'SECONDS') {
                                 sh "kubectl get nodes"
                             }
