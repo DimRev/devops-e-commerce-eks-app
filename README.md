@@ -18,6 +18,8 @@
 aws configure --profile e-commerce
 ```
 
+This is important as Terraform will use the e-commerce profile to create the EKS cluster and give that profile EKSAdmin privileges.
+
 1. Apply the terraform infra
 
 ```bash
@@ -27,6 +29,7 @@ make tf-apply
 2. Get the Jenkins IP from the outputs
 
 ```bash
+#outputs:
 app_bucket_name = ""
 eks_cluster_endpoint = ""
 eks_cluster_name = ""
@@ -58,3 +61,9 @@ cat /var/lib/jenkins/secrets/initialAdminPassword
 8. Create a new jenkins pipeline and point it to the `ci/generate-env.Jenkinsfile` file.
 
 9. Build the pipeline and provide the required details.
+
+10. Follow the pipeline to create the `.env` file for the required env to your backend s3 bucket.
+
+11. Create a new jenkins pipeline and point it to the `ci/backend-helm-install-or-upgrade.Jenkinsfile` file.
+
+12. Build the pipeline and provide the required details, This pipeline will deploy the required helm charts inside cluster, or updated them if they already exist.

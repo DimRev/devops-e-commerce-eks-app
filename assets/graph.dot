@@ -3,6 +3,7 @@ digraph G {
   node [shape = rect, fontname = "sans-serif"];
   "aws_key_pair.key_pair" [label="aws_key_pair.key_pair"];
   "aws_s3_bucket.app_bucket" [label="aws_s3_bucket.app_bucket"];
+  "aws_security_group.jenkins_eks_ingress" [label="aws_security_group.jenkins_eks_ingress"];
   subgraph "cluster_module.eks" {
     label = "module.eks"
     fontname = "sans-serif"
@@ -137,14 +138,13 @@ digraph G {
   subgraph "cluster_module.log_data_stream" {
     label = "module.log_data_stream"
     fontname = "sans-serif"
-    "module.log_data_stream.data.aws_iam_openid_connect_provider.oidc" [label="data.aws_iam_openid_connect_provider.oidc"];
+    "module.log_data_stream.data.aws_iam_role.eks_role" [label="data.aws_iam_role.eks_role"];
     "module.log_data_stream.aws_cloudwatch_log_group.firehose_log_group" [label="aws_cloudwatch_log_group.firehose_log_group"];
     "module.log_data_stream.aws_cloudwatch_log_stream.firehose_log_stream" [label="aws_cloudwatch_log_stream.firehose_log_stream"];
     "module.log_data_stream.aws_iam_policy.eks_kinesis_policy" [label="aws_iam_policy.eks_kinesis_policy"];
     "module.log_data_stream.aws_iam_policy.firehose_cloudwatch" [label="aws_iam_policy.firehose_cloudwatch"];
     "module.log_data_stream.aws_iam_policy.firehose_s3" [label="aws_iam_policy.firehose_s3"];
     "module.log_data_stream.aws_iam_policy.kinesis_firehose" [label="aws_iam_policy.kinesis_firehose"];
-    "module.log_data_stream.aws_iam_role.eks_kinesis_access" [label="aws_iam_role.eks_kinesis_access"];
     "module.log_data_stream.aws_iam_role.firehose" [label="aws_iam_role.firehose"];
     "module.log_data_stream.aws_iam_role_policy_attachment.eks_kinesis_attach" [label="aws_iam_role_policy_attachment.eks_kinesis_attach"];
     "module.log_data_stream.aws_iam_role_policy_attachment.firehose_cloudwatch_attach" [label="aws_iam_role_policy_attachment.firehose_cloudwatch_attach"];
@@ -241,6 +241,7 @@ digraph G {
     "module.vpc.aws_vpn_gateway_route_propagation.private" [label="aws_vpn_gateway_route_propagation.private"];
     "module.vpc.aws_vpn_gateway_route_propagation.public" [label="aws_vpn_gateway_route_propagation.public"];
   }
+  "aws_security_group.jenkins_eks_ingress" -> "module.jenkins.aws_security_group.jenkins_sg";
   "module.eks.data.aws_eks_addon_version.this" -> "module.eks.aws_eks_cluster.this";
   "module.eks.data.aws_iam_policy_document.cni_ipv6_policy" -> "module.eks.data.aws_partition.current";
   "module.eks.data.aws_iam_policy_document.custom" -> "module.eks.data.aws_partition.current";
@@ -262,6 +263,7 @@ digraph G {
   "module.eks.aws_eks_addon.this" -> "module.eks.module.self_managed_node_group.aws_eks_access_entry.this";
   "module.eks.aws_eks_addon.this" -> "module.eks.module.self_managed_node_group.aws_iam_role_policy.this";
   "module.eks.aws_eks_addon.this" -> "module.eks.module.self_managed_node_group.module.user_data.null_resource.validate_cluster_service_cidr";
+  "module.eks.aws_eks_cluster.this" -> "aws_security_group.jenkins_eks_ingress";
   "module.eks.aws_eks_cluster.this" -> "module.eks.aws_cloudwatch_log_group.this";
   "module.eks.aws_eks_cluster.this" -> "module.eks.aws_iam_policy.cni_ipv6_policy";
   "module.eks.aws_eks_cluster.this" -> "module.eks.aws_iam_role.eks_auto";
@@ -292,8 +294,8 @@ digraph G {
   "module.eks.aws_iam_role_policy_attachment.eks_auto_additional" -> "module.eks.aws_iam_role.eks_auto";
   "module.eks.aws_iam_role_policy_attachment.this" -> "module.eks.data.aws_partition.current";
   "module.eks.aws_iam_role_policy_attachment.this" -> "module.eks.aws_iam_role.this";
-  "module.eks.aws_security_group.cluster" -> "module.vpc.aws_default_vpc.this";
-  "module.eks.aws_security_group.node" -> "module.vpc.aws_default_vpc.this";
+  "module.eks.aws_security_group.cluster" -> "module.vpc.aws_vpc.this";
+  "module.eks.aws_security_group.node" -> "module.vpc.aws_vpc.this";
   "module.eks.aws_security_group_rule.cluster" -> "module.eks.aws_security_group.cluster";
   "module.eks.aws_security_group_rule.cluster" -> "module.eks.aws_security_group.node";
   "module.eks.aws_security_group_rule.node" -> "module.eks.aws_security_group.cluster";
@@ -382,16 +384,15 @@ digraph G {
   "module.jenkins.aws_instance.jenkins" -> "module.jenkins.data.template_file.jenkins_userdata";
   "module.jenkins.aws_instance.jenkins" -> "module.jenkins.aws_security_group.jenkins_sg";
   "module.jenkins.aws_instance.jenkins" -> "module.vpc.aws_subnet.public";
-  "module.jenkins.aws_security_group.jenkins_sg" -> "module.vpc.aws_default_vpc.this";
-  "module.log_data_stream.data.aws_iam_openid_connect_provider.oidc" -> "module.eks.aws_eks_cluster.this";
+  "module.jenkins.aws_security_group.jenkins_sg" -> "module.vpc.aws_vpc.this";
+  "module.log_data_stream.data.aws_iam_role.eks_role" -> "module.eks.aws_iam_role.this";
   "module.log_data_stream.aws_cloudwatch_log_stream.firehose_log_stream" -> "module.log_data_stream.aws_cloudwatch_log_group.firehose_log_group";
   "module.log_data_stream.aws_iam_policy.eks_kinesis_policy" -> "module.log_data_stream.aws_kinesis_stream.this";
   "module.log_data_stream.aws_iam_policy.firehose_cloudwatch" -> "module.log_data_stream.aws_cloudwatch_log_group.firehose_log_group";
   "module.log_data_stream.aws_iam_policy.firehose_s3" -> "aws_s3_bucket.app_bucket";
   "module.log_data_stream.aws_iam_policy.kinesis_firehose" -> "module.log_data_stream.aws_kinesis_stream.this";
-  "module.log_data_stream.aws_iam_role.eks_kinesis_access" -> "module.log_data_stream.data.aws_iam_openid_connect_provider.oidc";
+  "module.log_data_stream.aws_iam_role_policy_attachment.eks_kinesis_attach" -> "module.log_data_stream.data.aws_iam_role.eks_role";
   "module.log_data_stream.aws_iam_role_policy_attachment.eks_kinesis_attach" -> "module.log_data_stream.aws_iam_policy.eks_kinesis_policy";
-  "module.log_data_stream.aws_iam_role_policy_attachment.eks_kinesis_attach" -> "module.log_data_stream.aws_iam_role.eks_kinesis_access";
   "module.log_data_stream.aws_iam_role_policy_attachment.firehose_cloudwatch_attach" -> "module.log_data_stream.aws_iam_policy.firehose_cloudwatch";
   "module.log_data_stream.aws_iam_role_policy_attachment.firehose_cloudwatch_attach" -> "module.log_data_stream.aws_iam_role.firehose";
   "module.log_data_stream.aws_iam_role_policy_attachment.firehose_s3_attach" -> "module.log_data_stream.aws_iam_policy.firehose_s3";
