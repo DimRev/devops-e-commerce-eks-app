@@ -40,9 +40,9 @@ pipeline {
                             ENV = ENV.toLowerCase().replace('_', '-')
                             APP_NAME = APP_NAME.toLowerCase().replace('_', '-')
 
-                            def helmReleaseExists = sh(script: "helm list | grep ${ENV}-${APP_NAME}-Chart", returnStatus: true)
+                            def helmReleaseExists = sh(script: "helm list | grep ${ENV}-${APP_NAME}-chart", returnStatus: true)
                             if (helmReleaseExists != 0) {
-                                error("Helm Chart ${ENV}-${APP_NAME}-Chart does not exist")
+                                error("Helm Chart ${ENV}-${APP_NAME}-chart does not exist")
                             }
                         }
                     } catch (Exception e) {

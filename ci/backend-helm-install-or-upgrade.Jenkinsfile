@@ -179,7 +179,7 @@ EOF
                         APP_NAME = APP_NAME.toLowerCase().replace('_', '-')
 
                         def helmReleaseExists = sh(
-                            script: "helm list | grep ${ENV}-${APP_NAME}-Chart",
+                            script: "helm list | grep ${ENV}-${APP_NAME}-chart",
                             returnStatus: true
                         )
                         if (helmReleaseExists != 0) {

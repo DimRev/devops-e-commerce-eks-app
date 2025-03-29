@@ -10,6 +10,6 @@ ENV=$(cat .env | grep BACKEND_ENV | cut -d '=' -f 2)
 APP_NAME=$(cat .env | grep BACKEND_APP_NAME | cut -d '=' -f 2)
 
 
-echo "Uninstalling HELM Chart ${ENV}-${APP_NAME}-Chart..."
+echo "Uninstalling HELM Chart ${ENV}-${APP_NAME}-chart..."
 
 helm uninstall $ENV-$APP_NAME-Chart
