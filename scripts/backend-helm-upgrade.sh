@@ -11,7 +11,7 @@ APP_NAME=$(cat .env | grep BACKEND_APP_NAME | cut -d '=' -f 2)
 KINESIS_STREAM=$(cat .env | grep BACKEND_KINESIS_STREAM_NAME | cut -d '=' -f 2)
 AWS_REGION=$(cat .env | grep BACKEND_AWS_REGION | cut -d '=' -f 2)
 
-echo "Upgrading Helm Chart $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
+echo "Upgrading Helm Chart ${ENV}-${APP_NAME}-Chart..."
 
 helm upgrade $ENV-$APP_NAME-Chart ./k8s/backend-helm \
   --set image.repository="$IMAGE_REPO/$IMAGE_NAME" \

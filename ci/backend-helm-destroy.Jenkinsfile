@@ -36,6 +36,10 @@ pipeline {
                             sh "aws s3 cp s3://${S3_BACKEND_NAME}/envs/.env.${ENV} .env"
                             def appNameValue = sh(script: "cat .env | grep BACKEND_APP_NAME | cut -d '=' -f 2", returnStdout: true).trim()
                             APP_NAME = appNameValue
+
+                            ENV = ENV.toLowerCase().replace('_', '-')
+                            APP_NAME = APP_NAME.toLowerCase().replace('_', '-')
+
                             def helmReleaseExists = sh(script: "helm list | grep ${ENV}-${APP_NAME}-Chart", returnStatus: true)
                             if (helmReleaseExists != 0) {
                                 error("Helm Chart ${ENV}-${APP_NAME}-Chart does not exist")

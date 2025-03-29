@@ -175,6 +175,9 @@ EOF
                 script {
                     echo "========EXEC: Install or Upgrade Helm Chart========"
                     try {
+                        ENV = ENV.toLowerCase().replace('_', '-')
+                        APP_NAME = APP_NAME.toLowerCase().replace('_', '-')
+
                         def helmReleaseExists = sh(
                             script: "helm list | grep ${ENV}-${APP_NAME}-Chart",
                             returnStatus: true
