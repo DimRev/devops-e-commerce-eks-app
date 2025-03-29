@@ -1,9 +1,16 @@
+import AppFooter from './features/layout/components/AppFooter';
+import AppHeader from './features/layout/components/AppHeader';
+import { BrowserRouter, Route, Routes } from 'react-router';
+import HomePage from './features/view/components/HomePage';
+import AboutPage from './features/view/components/AboutPage';
+import ContactPage from './features/view/components/ContactPage';
+
 function App() {
   const env = window.__ENV__ || {
-    ENV: 'N/A',
-    APP_NAME: 'N/A',
-    API_URL: 'N/A',
-    VERSION: 'N/A',
+    ENV: 'local',
+    APP_NAME: 'e-commerce',
+    API_URL: 'http://localhost:5000/api',
+    VERSION: 'v-local',
   };
 
   if (!env) {
@@ -18,47 +25,17 @@ function App() {
 
   return (
     <>
-      <div className="h-dvh w-dvw flex flex-col">
-        <header className="h-10 flex justify-center items-center border-b">
-          <div className="container  flex h-full items-center justify-between">
-            <div>Logo</div>
-            <nav>
-              <ul className="flex items-center gap-x-4">
-                <li>
-                  <a href="/" className="">
-                    Home
-                  </a>
-                </li>
-                <li>
-                  <a href="/about" className="">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="/contact" className="">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </header>
-        <main className="flex-1 border flex flex-col items-center justify-center">
-          <div className="container flex-1">
-            <h1 className="text-4xl font-bold">
-              Welcome to the {env.APP_NAME} app
-            </h1>
-            <p>
-              This is a simple app to demonstrate how to use the frontend app
-            </p>
-          </div>
-        </main>
-        <footer className="h-5  flex justify-center items-center">
-          <p className="text-xs font-extrabold">
-            {env.ENV} - {env.APP_NAME} - {env.VERSION}
-          </p>
-        </footer>
-      </div>
+      <BrowserRouter>
+        <div className="h-dvh w-dvw flex flex-col">
+          <AppHeader />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+          </Routes>
+          <AppFooter env={env} />
+        </div>
+      </BrowserRouter>
     </>
   );
 }

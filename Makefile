@@ -1,4 +1,4 @@
-.PHONY: tf-apply tf-destroy tf-plan
+.PHONY: tf-apply tf-destroy tf-plan dev
 
 tf-apply:
 	@echo "Applying Terraform Changes"
@@ -11,3 +11,7 @@ tf-destroy:
 tf-plan:
 	@echo "Planning Terraform Changes"
 	@cd terraform && terraform plan
+
+dev:
+	@echo "Starting Dev Environment"
+	@./scripts/dev.sh
