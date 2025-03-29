@@ -68,17 +68,15 @@ pipeline {
                         // Write credentials to ~/.aws/credentials using the temporary profile 'jenkins-temp'
                         sh """
                         cat > ~/.aws/credentials <<EOF
-[jenkins-temp]
+[e-commerce]
 aws_access_key_id=\$AWS_ACCESS_KEY_ID
 aws_secret_access_key=\$AWS_SECRET_ACCESS_KEY
-aws_session_token=\$AWS_SESSION_TOKEN
 EOF
                         """
-                        // Write configuration (region, etc.) to ~/.aws/config.
-                        // Here we use the AWS_DEFAULT_REGION environment variable (set by your credentials binding or otherwise).
+
                         sh """
                         cat > ~/.aws/config <<EOF
-[profile jenkins-temp]
+[profile e-commerce]
 region=\$AWS_DEFAULT_REGION
 output=json
 EOF
@@ -149,7 +147,12 @@ EOF
                                 error("BACKEND_AWS_REGION not found in .env file")
                             }
                             // Use the temporary profile to update kubeconfig.
-                            sh "aws eks update-kubeconfig --name ${eksClusterNameValue} --region ${eksClusterRegionValue} --profile jenkins-temp"
+                            sh "aws eks update-kubeconfig --name ${eksClusterNameValue} --region ${eksClusterRegionValue} --profile e-commerce"
+
+                            sh "kubectl config use-context e-commerce"
+                            timeout(time: 30, unit: 'SECONDS') {
+                                sh "kubectl get nodes"
+                            }
                         }
                     } catch (Exception e) {
                         ERROR = e.getMessage()

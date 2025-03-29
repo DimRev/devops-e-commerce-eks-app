@@ -33,8 +33,6 @@ resource "aws_instance" "jenkins" {
   ami           = data.aws_ami.jenkins_ami.image_id
   instance_type = "t3.medium"
 
-
-
   user_data = base64encode(data.template_file.jenkins_userdata.rendered)
 
   key_name = var.key_pair_name
@@ -103,3 +101,4 @@ resource "aws_security_group" "jenkins_sg" {
     Env       = var.environment
   }
 }
+

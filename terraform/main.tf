@@ -41,6 +41,25 @@ module "vpc" {
     Env       = var.environment
   }
 }
+
+resource "aws_security_group" "jenkins_eks_ingress" {
+  name        = "${var.environment}-${var.app_name}-jenkins-eks-sg"
+  description = "Allow EKS to communicate with Jenkins"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [module.jenkins.security_group_id]
+  }
+  tags = {
+    Name      = "${var.environment}-${var.app_name}-jenkins-eks-sg"
+    Terraform = "true"
+    Env       = var.environment
+  }
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.31"
@@ -49,7 +68,9 @@ module "eks" {
   cluster_version = "1.28"
 
   vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.public_subnets
+  subnet_ids = module.vpc.private_subnets
+
+  cluster_additional_security_group_ids = [aws_security_group.jenkins_eks_ingress.id]
 
   eks_managed_node_groups = {
     eks_nodes = {
