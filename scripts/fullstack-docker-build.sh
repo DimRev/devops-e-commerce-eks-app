@@ -6,7 +6,7 @@ IMAGE_VERSION=$(cat .env | grep BACKEND_IMAGE_VERSION | cut -d '=' -f 2)
 
 echo "Building Docker image $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
 
-cd app/backend-app
+cd app
 
 docker build .\
   -t $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION\

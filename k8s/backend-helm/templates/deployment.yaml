@@ -30,3 +30,7 @@ spec:
               value: {{ .Values.env.kinesisStreamName }}
             - name: AWS_REGION
               value: {{ .Values.env.awsRegion }}
+            - name: API_URL
+              value: {{ .Values.eks.clusterEndpoint }}:{{ .Values.service.port }}/api
+            - name: VERSION
+              value: {{ .Values.image.tag }}

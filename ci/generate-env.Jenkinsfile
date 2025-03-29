@@ -113,7 +113,8 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the backend image version', name: 'BACKEND_IMAGE_VERSION'),
                                 string(defaultValue: '', description: 'Enter the backend kinesis stream name', name: 'BACKEND_KINESIS_STREAM_NAME'),
                                 string(defaultValue: '', description: 'Enter the backend aws region', name: 'BACKEND_AWS_REGION'),
-                                string(defaultValue: '', description: 'Enter the backend eks cluster name', name: 'EKS_CLUSTER_NAME')
+                                string(defaultValue: '', description: 'Enter the backend eks cluster name', name: 'EKS_CLUSTER_NAME'),
+                                string(defaultValue: '', description: 'Enter the backend eks cluster endpoint', name: 'EKS_CLUSTER_ENDPOINT')
                             ]
                         )
                         echo "Generate .env file input: ${userInput}"
@@ -124,7 +125,7 @@ pipeline {
                             userInput['BACKEND_KINESIS_STREAM_NAME'].isEmpty()||
                             userInput['BACKEND_AWS_REGION'].isEmpty()||
                             userInput['EKS_CLUSTER_NAME'].isEmpty()
-
+                            userInput['EKS_CLUSTER_ENDPOINT'].isEmpty()
                         ) {
                             error('Please provide the required details')
                         }
@@ -134,6 +135,7 @@ pipeline {
                         BACKEND_KINESIS_STREAM_NAME = userInput['BACKEND_KINESIS_STREAM_NAME']
                         BACKEND_AWS_REGION = userInput['BACKEND_AWS_REGION']
                         EKS_CLUSTER_NAME = userInput['EKS_CLUSTER_NAME']
+                        EKS_CLUSTER_ENDPOINT = userInput['EKS_CLUSTER_ENDPOINT']
 
                         sh "touch .env.${ENV}"
                         sh "echo BACKEND_IMAGE_NAME=${BACKEND_IMAGE_NAME} >> .env.${ENV}"
@@ -144,6 +146,7 @@ pipeline {
                         sh "echo BACKEND_KINESIS_STREAM_NAME=${BACKEND_KINESIS_STREAM_NAME} >> .env.${ENV}"
                         sh "echo BACKEND_AWS_REGION=${BACKEND_AWS_REGION} >> .env.${ENV}"
                         sh "echo EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME} >> .env.${ENV}"
+                        sh "echo EKS_CLUSTER_ENDPOINT=${EKS_CLUSTER_ENDPOINT} >> .env.${ENV}"
 
                         echo "File .env.${ENV} created"
 

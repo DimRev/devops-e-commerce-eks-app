@@ -11,6 +11,8 @@ class Config:
             cls._instance._APP_NAME = os.getenv("APP_NAME")
             cls._instance._KINESIS_STREAM_NAME = os.getenv("KINESIS_STREAM_NAME")
             cls._instance._AWS_REGION = os.getenv("AWS_REGION")
+            cls._instance._API_URL = os.getenv("API_URL")
+            cls._instance._VERSION = os.getenv("VERSION")
         return cls._instance
 
 
@@ -32,3 +34,11 @@ class Config:
     @property
     def AWS_REGION(self):
         return self._AWS_REGION
+
+    @property
+    def API_URL(self):
+        return self._API_URL
+
+    @property
+    def VERSION(self):
+        return self._VERSION
