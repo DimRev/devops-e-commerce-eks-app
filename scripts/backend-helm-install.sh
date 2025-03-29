@@ -13,7 +13,7 @@ AWS_REGION=$(cat .env | grep BACKEND_AWS_REGION | cut -d '=' -f 2)
 
 echo "Installing HELM Chart ${ENV}-${APP_NAME}-chart..."
 
-helm install $ENV-$APP_NAME-Chart ./k8s/backend-helm \
+helm install $ENV-$APP_NAME-chart ./k8s/backend-helm \
   --set image.repository="$IMAGE_REPO/$IMAGE_NAME" \
   --set image.tag="v$IMAGE_VERSION" \
   --set env.env="$ENV" \
