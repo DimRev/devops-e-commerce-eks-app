@@ -38,3 +38,12 @@ sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/
 sudo chmod 700 get_helm.sh
 sudo ./get_helm.sh
 sudo -rm -f get_helm.sh
+
+# Install AWS CLI2
+echo "Installing AWS CLI2..."
+sudo yum remove awscli -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+rm -rf aws awscliv2.zip
+sudo ln -s /usr/local/bin/aws /usr/bin/aws

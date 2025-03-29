@@ -42,6 +42,7 @@ resource "aws_instance" "jenkins" {
     aws_security_group.jenkins_sg.id
   ]
   subnet_id = var.subnet_id
+
   tags = {
     Name      = "${var.environment}-${var.app_name}-jenkins-ec2"
     Terraform = "true"
