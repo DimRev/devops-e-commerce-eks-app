@@ -1,10 +1,14 @@
 import os
-from flask import Flask, send_from_directory
-from auth.auth_controller import auth_bp
-from config.config import Config
 import json
 
+from flask import Flask, send_from_directory, request
+from flask_cors import CORS
+
+from auth.auth_controller import auth_bp
+from config.config import Config
+
 app = Flask(__name__, static_folder='dist', static_url_path='')
+CORS(app)
 
 config = Config()
 
@@ -24,6 +28,8 @@ def serve(path):
     else:
         with open(os.path.join(app.static_folder, 'index.html'), 'r') as f:
             html = f.read()
+        # api_url = config.API_URL.strip() or f"{request.host_url.rstrip('/')}/api"
+        api_url = f"{request.host_url.rstrip('/')}/api"
         env_vars = {
             "ENV": config.ENV,
             "APP_NAME": config.APP_NAME,

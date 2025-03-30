@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router';
+import AuthButtons from '~/features/auth/components/AuthButtons';
 import { buttonVariants } from '~/features/shared/components/ui/button';
 import { cn } from '~/lib/utils';
 
@@ -42,6 +43,7 @@ function AppHeader() {
             >
               Contact
             </NavLink>
+            <AuthButtons />
           </div>
         </nav>
       </div>

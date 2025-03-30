@@ -8,7 +8,7 @@ function AppFooter({ env }: Props) {
   return (
     <footer className="h-5  flex justify-center items-center">
       <p className="text-xs font-extrabold">
-        {env.ENV} - {env.APP_NAME} - {env.VERSION}
+        {env.ENV} - {env.APP_NAME} - {env.VERSION} - {env.API_URL}
       </p>
     </footer>
   );

@@ -7,13 +7,13 @@ class AuthService:
         pass
 
     def login(self, login_request: LoginRequestSchema):
-        data_streamer.send_info_log_event(f"User {login_request.email} is trying to login")
+        # data_streamer.send_info_log_event(f"User {login_request.email} is trying to login")
         return "login not implemented"
 
     def logout(self, logout_request: LogoutRequestSchema):
-        data_streamer.send_info_log_event(f"User is trying to logout")
+        # data_streamer.send_info_log_event(f"User is trying to logout")
         return "logout not implemented"
 
     def register(self, register_request: RegisterRequestSchema):
-        data_streamer.send_info_log_event(f"User {register_request.email} is trying to register")
+        # data_streamer.send_info_log_event(f"User {register_request.email} is trying to register")
         return "register not implemented"

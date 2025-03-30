@@ -11,18 +11,8 @@ APP_NAME=$(cat .env | grep BACKEND_APP_NAME | cut -d '=' -f 2)
 BACKEND_KINESIS_STREAM_NAME=$(cat .env | grep BACKEND_KINESIS_STREAM_NAME | cut -d '=' -f 2)
 AWS_REGION=$(cat .env | grep BACKEND_AWS_REGION | cut -d '=' -f 2)
 
-echo "Running Docker image $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
+echo "Deleting Docker image $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION..."
 
 cd app
 
-docker run \
-  -e ENV="$ENV" \
-  -e APP_NAME="$APP_NAME" \
-  -e KINESIS_STREAM_NAME="$BACKEND_KINESIS_STREAM_NAME" \
-  -e AWS_REGION="$AWS_REGION" \
-  -e API_URL="http://localhost:5000/api" \
-  -e VERSION="v$IMAGE_VERSION" \
-  -p 5000:5000 \
-  -d \
-  --name "$ENV-$APP_NAME" \
-  $IMAGE_REPO/$IMAGE_NAME:v$IMAGE_VERSION
+docker rm -f "$ENV-$APP_NAME"
