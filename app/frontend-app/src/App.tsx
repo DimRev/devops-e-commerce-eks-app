@@ -4,14 +4,10 @@ import { BrowserRouter, Route, Routes } from 'react-router';
 import HomePage from './features/view/components/HomePage';
 import AboutPage from './features/view/components/AboutPage';
 import ContactPage from './features/view/components/ContactPage';
+import { defaultEnv } from './lib/globals';
 
 function App() {
-  const env = window.__ENV__ || {
-    ENV: 'local',
-    APP_NAME: 'e-commerce',
-    API_URL: 'http://localhost:5000/api',
-    VERSION: 'v-local',
-  };
+  const env = window.__ENV__ || defaultEnv;
 
   if (!env) {
     console.error('No environment variables found');
