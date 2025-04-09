@@ -1,3 +1,6 @@
+// Import the annotation so our globals persist between stages
+import groovy.transform.Field
+
 @Field def ENV = ''
 @Field def APP_NAME = ''
 @Field def API_URL = ''
