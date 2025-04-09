@@ -2,6 +2,7 @@ provider "aws" {
   region  = "us-east-1"
   profile = "e-commerce"
 }
+
 resource "aws_key_pair" "key_pair" {
   key_name   = "${var.environment}-${var.app_name}-key"
   public_key = file("~/.ssh/id_rsa.pub")
@@ -151,3 +152,17 @@ module "jenkins" {
 
   environment = var.environment
 }
+
+# Add the frontend_dist module
+module "frontend_dist" {
+  source = "./modules/frontend_dist"
+
+  app_name              = var.app_name
+  environment           = var.environment
+  s3_bucket_id          = aws_s3_bucket.app_bucket.id
+  s3_bucket_arn         = aws_s3_bucket.app_bucket.arn
+  s3_bucket_domain_name = aws_s3_bucket.app_bucket.bucket_regional_domain_name
+  html_directory        = "html" # Directory in the bucket where React app files will be stored
+}
+
+# Output the CloudFront URL for the frontend

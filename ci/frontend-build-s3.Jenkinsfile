@@ -3,56 +3,35 @@
 @Field def API_URL = ''
 @Field def ERROR = ''
 
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage("Check Environment"){
+
+    stages {
+        stage("Get Deployment Info") {
             steps {
                 script {
-                    echo "========EXEC: Check Environment========"
+                    echo "========EXEC: Get Deployment Info========"
                     try {
-                        // Input returns a string since there's only one parameter.
                         def userInput = input(
-                            message: 'Please provide the required details:',
+                            message: 'Please provide deployment details:',
                             parameters: [
-                                string(defaultValue: '', description: 'Enter the environment', name: 'ENV')
+                                string(defaultValue: 'dev', description: 'Environment (dev, staging, prod)', name: 'ENV'),
+                                string(defaultValue: 'e-commerce', description: 'Application name', name: 'APP_NAME'),
+                                string(defaultValue: 'some-api-url', description: 'Backend API URL', name: 'API_URL')
                             ]
                         )
-                        echo "User Input returned: ${userInput}"
-                        if (userInput == null || userInput.trim().isEmpty()) {
-                            error('Please provide the required details')
-                        }
-                        ENV = userInput
 
-                        // Check if the .env file exists in S3.
-                        withCredentials([
-                            [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                            [$class: 'StringBinding', credentialsId: 's3_backend_name', variable: 'S3_BACKEND_NAME']
-                        ]) {
-                            def envExists = sh(
-                                script: "aws s3 ls s3://${S3_BACKEND_NAME}/envs/.env.${ENV}",
-                                returnStatus: true
-                            )
-                            if (envExists != 0) {
-                                error("File .env.${ENV} does not exist in bucket")
-                            }
+                        ENV = userInput.ENV
+                        APP_NAME = userInput.APP_NAME
+                        API_URL = userInput.API_URL
+
+                        echo "Environment: ${ENV}"
+                        echo "App Name: ${APP_NAME}"
+                        echo "API URL: ${API_URL}"
+
+                        if (ENV.trim().isEmpty() || APP_NAME.trim().isEmpty() || API_URL.trim().isEmpty()) {
+                            error("All fields are required")
                         }
-                        def appDetails = input(
-                            message: 'Please provide the required details:',
-                            parameters: [
-                                string(defaultValue: '', description: 'Enter the APP name', name: 'APP_NAME'),
-                                string(defaultValue: '', description: 'Enter the API url', name: 'API_URL'),
-                            ]
-                        )
-                        echo "User Input returned: ${appDetails}"
-                        if (
-                            userInput['APP_NAME'].isEmpty() ||
-                            userInput['API_URL'].isEmpty()
-                          ){
-                            error('Please provide the required details')
-                            }
-                            APP_NAME = appDetails['APP_NAME']
-                            API_URL = appDetails['API_URL']
                     } catch (Exception e) {
                         ERROR = e.getMessage()
                         throw e
@@ -61,29 +40,80 @@ pipeline{
             }
             post {
                 success {
-                    echo "========SUCCESS: Check Environment========"
-                    echo "ENV: ${ENV}"
+                    echo "========SUCCESS: Get Deployment Info========"
                 }
                 failure {
-                    echo "========FAILURE: Check Environment========"
+                    echo "========FAILURE: Get Deployment Info========"
                     echo "ERROR: ${ERROR}"
                 }
             }
         }
-        stage("Checkout code") {
+
+        stage("Checkout Code") {
             steps {
                 script {
-                    echo "========EXEC: Checkout code========"
+                    echo "========EXEC: Checkout Code========"
                     try {
                         checkout scm
-                        withCredentials([
-                            [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-                        ]) {
-                          sh "touch ./app/frontend-app/.env.production"
-                          sh "echo VITE_APP_ENV=${ENV} >> ./app/frontend-app/.env.production"
-                          sh "echo VITE_APP_NAME=${APP_NAME} >> ./app/frontend-app/.env.production"
-                          sh "echo VITE_API_URL=${API_URL} >> ./app/frontend-app/.env.production"
-                          sh "echo VITE_APP_VERSION=0.2.0 >> ./app/frontend-app/.env.production"
+                    } catch (Exception e) {
+                        ERROR = e.getMessage()
+                        throw e
+                    }
+                }
+            }
+            post {
+                success {
+                    echo "========SUCCESS: Checkout Code========"
+                }
+                failure {
+                    echo "========FAILURE: Checkout Code========"
+                    echo "ERROR: ${ERROR}"
+                }
+            }
+        }
+
+        stage("Configure React App") {
+            steps {
+                script {
+                    echo "========EXEC: Configure React App========"
+                    try {
+                        // Create .env file for React app with the provided API URL
+                        sh """
+                        cat > frontend-app/.env.production << EOL
+VITE_API_URL=${API_URL}
+VITE_APP_ENV=${ENV}
+VITE_APP_NAME=${APP_NAME}
+VITE_APP_VERSION=\$(date +%Y.%m.%d-%H%M)
+EOL
+                        """
+
+                        sh "cat frontend-app/.env.production"
+                    } catch (Exception e) {
+                        ERROR = e.getMessage()
+                        throw e
+                    }
+                }
+            }
+            post {
+                success {
+                    echo "========SUCCESS: Configure React App========"
+                }
+                failure {
+                    echo "========FAILURE: Configure React App========"
+                    echo "ERROR: ${ERROR}"
+                }
+            }
+        }
+
+        stage("Build React App") {
+            steps {
+                script {
+                    echo "========EXEC: Build React App========"
+                    try {
+                        dir('frontend-app') {
+                            // Install dependencies and build the React app
+                            sh "npm ci"
+                            sh "npm run build"
                         }
                     } catch (Exception e) {
                         ERROR = e.getMessage()
@@ -93,41 +123,99 @@ pipeline{
             }
             post {
                 success {
-                    echo "========SUCCESS: Checkout code========"
+                    echo "========SUCCESS: Build React App========"
                 }
                 failure {
-                    echo "========FAILURE: Checkout code========"
+                    echo "========FAILURE: Build React App========"
                     echo "ERROR: ${ERROR}"
                 }
             }
         }
-        stage("Deploy Frontend"){
-          script{
-            try {
-              echo "========EXEC: Deploy Frontend========"
-              withCredentials([
-                  [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials'],
-              ]) {
-                sh "aws s3 cp s3://${ENV}-${APP_NAME}-app-bucket/envs/.env.${ENV} .env"
-              }
-              sh "make fs-build"
-              sh "make fs-push"
-            } catch (Exception e) {
-                ERROR = e.getMessage()
-                throw e
+
+        stage("Deploy to S3") {
+            steps {
+                script {
+                    echo "========EXEC: Deploy to S3========"
+                    try {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
+                            // Sync the build directory to the S3 bucket's html directory
+                            sh "aws s3 sync frontend-app/dist/ s3://${ENV}-${APP_NAME}-app-bucket/html/ --delete"
+
+                            // Get the CloudFront distribution URL
+                            sh """
+                            DISTRIBUTION_DOMAIN=\$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Origins.Items[].DomainName, '${ENV}-${APP_NAME}-app-bucket')].DomainName" --output text)
+                            if [ -n "\$DISTRIBUTION_DOMAIN" ]; then
+                                echo "Frontend deployed successfully!"
+                                echo "CloudFront URL: https://\$DISTRIBUTION_DOMAIN"
+                            else
+                                echo "Frontend deployed to S3 bucket: ${ENV}-${APP_NAME}-app-bucket/html/"
+                            fi
+                            """
+                        }
+                    } catch (Exception e) {
+                        ERROR = e.getMessage()
+                        throw e
+                    }
+                }
             }
-          }
+            post {
+                success {
+                    echo "========SUCCESS: Deploy to S3========"
+                }
+                failure {
+                    echo "========FAILURE: Deploy to S3========"
+                    echo "ERROR: ${ERROR}"
+                }
+            }
+        }
+
+        stage("Invalidate CloudFront Cache") {
+            steps {
+                script {
+                    echo "========EXEC: Invalidate CloudFront Cache========"
+                    try {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
+                            sh """
+                            # Get the CloudFront distribution ID
+                            DISTRIBUTION_ID=\$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Origins.Items[].DomainName, '${ENV}-${APP_NAME}-app-bucket')].Id" --output text)
+
+                            if [ -n "\$DISTRIBUTION_ID" ]; then
+                                echo "Invalidating CloudFront cache for distribution: \$DISTRIBUTION_ID"
+                                aws cloudfront create-invalidation --distribution-id \$DISTRIBUTION_ID --paths "/*"
+                                echo "Cache invalidation initiated"
+                            else
+                                echo "No CloudFront distribution found for this bucket"
+                            fi
+                            """
+                        }
+                    } catch (Exception e) {
+                        ERROR = e.getMessage()
+                        throw e
+                    }
+                }
+            }
+            post {
+                success {
+                    echo "========SUCCESS: Invalidate CloudFront Cache========"
+                }
+                failure {
+                    echo "========FAILURE: Invalidate CloudFront Cache========"
+                    echo "ERROR: ${ERROR}"
+                }
+            }
         }
     }
-    post{
-        always{
-            echo "========always========"
+
+    post {
+        always {
+            echo "========Pipeline Completed========"
         }
-        success{
-            echo "========pipeline executed successfully ========"
+        success {
+            echo "========Pipeline Executed Successfully========"
         }
-        failure{
-            echo "========pipeline execution failed========"
+        failure {
+            echo "========Pipeline Execution Failed========"
+            echo "ERROR: ${ERROR}"
         }
     }
 }

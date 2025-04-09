@@ -52,3 +52,11 @@ output "jenkins_ip" {
   description = "Jenkins public IP or Load Balancer hostname."
   value       = module.jenkins.public_ip
 }
+
+#############################
+# Frontend Output
+#############################
+output "frontend_url" {
+  description = "The URL of the frontend application"
+  value       = module.frontend_dist.cloudfront_distribution_domain_name
+}
