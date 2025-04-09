@@ -9,6 +9,7 @@ import groovy.transform.Field
 @Field def BACKEND_KINESIS_STREAM_NAME = ''
 @Field def BACKEND_AWS_REGION = ''
 @Field def EKS_CLUSTER_NAME = ''
+@Field def EKS_CLUSTER_ENDPOINT = '' // Added declaration for EKS_CLUSTER_ENDPOINT
 @Field def ERROR = ''
 
 pipeline {
@@ -125,7 +126,7 @@ pipeline {
                             userInput['BACKEND_KINESIS_STREAM_NAME'].isEmpty() ||
                             userInput['BACKEND_AWS_REGION'].isEmpty() ||
                             userInput['EKS_CLUSTER_NAME'].isEmpty() ||
-                            userInput['EKS_CLUSTER_ENDPOINT'].isEmpty() // Corrected line
+                            userInput['EKS_CLUSTER_ENDPOINT'].isEmpty()
                         ) {
                             error('Please provide the required details')
                         }
