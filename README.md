@@ -67,3 +67,5 @@ cat /var/lib/jenkins/secrets/initialAdminPassword
 11. Create a new jenkins pipeline and point it to the `ci/backend-helm-install-or-upgrade.Jenkinsfile` file.
 
 12. Build the pipeline and provide the required details, This pipeline will deploy the required helm charts inside cluster, or updated them if they already exist.
+
+13. Deploy the frontend app to the S3 bucket using `frontend-deploy.sh` script.

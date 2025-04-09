@@ -55,7 +55,7 @@ resource "aws_cloudfront_distribution" "frontend_distribution" {
       }
     }
 
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
     min_ttl                = var.min_ttl
     default_ttl            = var.default_ttl
     max_ttl                = var.max_ttl
@@ -114,7 +114,7 @@ resource "aws_cloudfront_distribution" "frontend_distribution" {
     default_ttl            = 86400    # 1 day
     max_ttl                = 31536000 # 1 year
     compress               = true
-    viewer_protocol_policy = "redirect-to-https"
+    viewer_protocol_policy = "allow-all"
   }
 
   tags = {
