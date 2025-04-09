@@ -14,7 +14,8 @@ env:
 
 service:
   type: LoadBalancer
-  port: 80
+  httpPort: 80
+  httpsPort: 443
   targetPort: 5000
   publicSubnets:
     - "subnet-xxx"
