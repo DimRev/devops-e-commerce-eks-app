@@ -1,14 +1,12 @@
-import { Env } from '~/globals';
+import { AppConfig } from '~/lib/globals';
 
-type Props = {
-  env: Env;
-};
+const config = AppConfig.getInstance();
 
-function AppFooter({ env }: Props) {
+function AppFooter() {
   return (
     <footer className="h-5  flex justify-center items-center">
       <p className="text-xs font-extrabold">
-        {env.ENV} - {env.APP_NAME} - {env.VERSION} - {env.API_URL}
+        {config.env} - {config.appName} - {config.appVersion} - {config.apiUrl}
       </p>
     </footer>
   );

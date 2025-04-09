@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { defaultEnv } from './globals';
+import { AppConfig } from './globals';
 
-const env = window.__ENV__ || defaultEnv;
+const config = AppConfig.getInstance();
 
 const routes = {
-  auth: `${env.API_URL}/v1/auth`,
+  auth: `${config.apiUrl}/v1/auth`,
 };
 
 export const ROUTES = {
