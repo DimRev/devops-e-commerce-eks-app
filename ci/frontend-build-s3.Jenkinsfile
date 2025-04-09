@@ -114,9 +114,7 @@ EOL
                     echo "========EXEC: Build React App========"
                     try {
                         dir('frontend-app') {
-                            // Install dependencies and build the React app
-                            sh "npm ci"
-                            sh "npm run build"
+                            sh "pnpm run build"
                         }
                     } catch (Exception e) {
                         ERROR = e.getMessage()
