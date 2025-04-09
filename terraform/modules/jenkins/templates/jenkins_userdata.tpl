@@ -37,7 +37,7 @@ echo "Installing Helm..."
 sudo curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 sudo chmod 700 get_helm.sh
 sudo ./get_helm.sh
-sudo -rm -f get_helm.sh
+sudo rm -f get_helm.sh
 
 # Install AWS CLI2
 echo "Installing AWS CLI2..."
@@ -47,3 +47,23 @@ unzip awscliv2.zip
 sudo ./aws/install
 rm -rf aws awscliv2.zip
 sudo ln -s /usr/local/bin/aws /usr/bin/aws
+
+# Install Node.js 18 directly using NodeSource repository
+echo "Installing Node.js 18..."
+sudo curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
+sudo yum install -y nodejs
+
+# Verify Node.js installation
+echo "Node.js version:"
+sudo node -v
+sudo npm -v
+
+# Install pnpm 10 globally
+echo "Installing pnpm 10..."
+sudo npm install -g pnpm@10
+
+# Verify pnpm installation
+echo "pnpm version:"
+sudo pnpm -v
+
+echo "Installation complete!"
