@@ -20,25 +20,5 @@ def healthz():
 
 app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve(path):
-    if path and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:
-        with open(os.path.join(app.static_folder, 'index.html'), 'r') as f:
-            html = f.read()
-        # api_url = config.API_URL.strip() or f"{request.host_url.rstrip('/')}/api"
-        api_url = f"{request.host_url.rstrip('/')}/api"
-        env_vars = {
-            "ENV": config.ENV,
-            "APP_NAME": config.APP_NAME,
-            "API_URL": config.API_URL,
-            "VERSION": config.VERSION
-        }
-        injection = f'<script>window.__ENV__ = {json.dumps(env_vars)};</script>'
-        html = html.replace('</head>', injection + '</head>')
-        return html
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

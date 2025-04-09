@@ -30,7 +30,5 @@ spec:
               value: {{ .Values.env.kinesisStreamName }}
             - name: AWS_REGION
               value: {{ .Values.env.awsRegion }}
-            - name: API_URL
-              value: {{ .Values.lb.loadBalancerDNSName | default "http://placeholder.example.com/api" }}
             - name: VERSION
               value: {{ .Values.image.tag }}

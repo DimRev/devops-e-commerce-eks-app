@@ -121,11 +121,11 @@ pipeline {
                         if (
                             userInput['BACKEND_IMAGE_NAME'].isEmpty() ||
                             userInput['BACKEND_IMAGE_REPO'].isEmpty() ||
-                            userInput['BACKEND_IMAGE_VERSION'].isEmpty()||
-                            userInput['BACKEND_KINESIS_STREAM_NAME'].isEmpty()||
-                            userInput['BACKEND_AWS_REGION'].isEmpty()||
-                            userInput['EKS_CLUSTER_NAME'].isEmpty()
-                            userInput['EKS_CLUSTER_ENDPOINT'].isEmpty()
+                            userInput['BACKEND_IMAGE_VERSION'].isEmpty() ||
+                            userInput['BACKEND_KINESIS_STREAM_NAME'].isEmpty() ||
+                            userInput['BACKEND_AWS_REGION'].isEmpty() ||
+                            userInput['EKS_CLUSTER_NAME'].isEmpty() ||
+                            userInput['EKS_CLUSTER_ENDPOINT'].isEmpty() // Corrected line
                         ) {
                             error('Please provide the required details')
                         }
