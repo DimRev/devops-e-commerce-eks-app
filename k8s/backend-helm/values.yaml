@@ -16,6 +16,9 @@ service:
   type: LoadBalancer
   port: 80
   targetPort: 5000
+  publicSubnets:
+    - "subnet-xxx"
+    - "subnet-yyy"
 
 ingress:
   enabled: false

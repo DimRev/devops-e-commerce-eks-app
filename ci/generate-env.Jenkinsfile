@@ -9,7 +9,9 @@ import groovy.transform.Field
 @Field def BACKEND_KINESIS_STREAM_NAME = ''
 @Field def BACKEND_AWS_REGION = ''
 @Field def EKS_CLUSTER_NAME = ''
-@Field def EKS_CLUSTER_ENDPOINT = '' // Added declaration for EKS_CLUSTER_ENDPOINT
+@Field def EKS_CLUSTER_ENDPOINT = ''
+@Field def VPC_PUBLIC_SUBNET_1 = ''
+@Field def VPC_PUBLIC_SUBNET_2 = ''
 @Field def ERROR = ''
 
 pipeline {
@@ -115,7 +117,9 @@ pipeline {
                                 string(defaultValue: '', description: 'Enter the backend kinesis stream name', name: 'BACKEND_KINESIS_STREAM_NAME'),
                                 string(defaultValue: '', description: 'Enter the backend aws region', name: 'BACKEND_AWS_REGION'),
                                 string(defaultValue: '', description: 'Enter the backend eks cluster name', name: 'EKS_CLUSTER_NAME'),
-                                string(defaultValue: '', description: 'Enter the backend eks cluster endpoint', name: 'EKS_CLUSTER_ENDPOINT')
+                                string(defaultValue: '', description: 'Enter the backend eks cluster endpoint', name: 'EKS_CLUSTER_ENDPOINT'),
+                                string(defaultValue: '', description: 'Enter the backend eks cluster endpoint', name: 'VPC_PUBLIC_SUBNET_1'),
+                                string(defaultValue: '', description: 'Enter the backend eks cluster endpoint', name: 'VPC_PUBLIC_SUBNET_2'),
                             ]
                         )
                         echo "Generate .env file input: ${userInput}"
@@ -126,7 +130,9 @@ pipeline {
                             userInput['BACKEND_KINESIS_STREAM_NAME'].isEmpty() ||
                             userInput['BACKEND_AWS_REGION'].isEmpty() ||
                             userInput['EKS_CLUSTER_NAME'].isEmpty() ||
-                            userInput['EKS_CLUSTER_ENDPOINT'].isEmpty()
+                            userInput['EKS_CLUSTER_ENDPOINT'].isEmpty() ||
+                            userInput['VPC_PUBLIC_SUBNET_1'].isEmpty() ||
+                            userInput['VPC_PUBLIC_SUBNET_2'].isEmpty()
                         ) {
                             error('Please provide the required details')
                         }
@@ -137,6 +143,8 @@ pipeline {
                         BACKEND_AWS_REGION = userInput['BACKEND_AWS_REGION']
                         EKS_CLUSTER_NAME = userInput['EKS_CLUSTER_NAME']
                         EKS_CLUSTER_ENDPOINT = userInput['EKS_CLUSTER_ENDPOINT']
+                        VPC_PUBLIC_SUBNET_1 = userInput['VPC_PUBLIC_SUBNET_1']
+                        VPC_PUBLIC_SUBNET_2 = userInput['VPC_PUBLIC_SUBNET_2']
 
                         sh "touch .env.${ENV}"
                         sh "echo BACKEND_IMAGE_NAME=${BACKEND_IMAGE_NAME} >> .env.${ENV}"
@@ -148,6 +156,8 @@ pipeline {
                         sh "echo BACKEND_AWS_REGION=${BACKEND_AWS_REGION} >> .env.${ENV}"
                         sh "echo EKS_CLUSTER_NAME=${EKS_CLUSTER_NAME} >> .env.${ENV}"
                         sh "echo EKS_CLUSTER_ENDPOINT=${EKS_CLUSTER_ENDPOINT} >> .env.${ENV}"
+                        sh "echo VPC_PUBLIC_SUBNET_1=${VPC_PUBLIC_SUBNET_1} >> .env.${ENV}"
+                        sh "echo VPC_PUBLIC_SUBNET_2=${VPC_PUBLIC_SUBNET_2} >> .env.${ENV}"
 
                         echo "File .env.${ENV} created"
 
