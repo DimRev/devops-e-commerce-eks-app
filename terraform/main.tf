@@ -60,6 +60,32 @@ resource "aws_security_group" "jenkins_eks_ingress" {
   }
 }
 
+resource "aws_security_group" "load_balancer_sg" {
+  name        = "${var.environment}-${var.app_name}-lb-sg"
+  description = "Security group for the load balancer"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow traffic from anywhere to port 80
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"] # Allow all outbound traffic
+  }
+
+  tags = {
+    Name      = "${var.environment}-${var.app_name}-lb-sg"
+    Terraform = "true"
+    Env       = var.environment
+  }
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.31"
@@ -70,7 +96,10 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  cluster_additional_security_group_ids = [aws_security_group.jenkins_eks_ingress.id]
+  cluster_additional_security_group_ids = [
+    aws_security_group.jenkins_eks_ingress.id,
+    aws_security_group.load_balancer_sg.id
+  ]
 
   eks_managed_node_groups = {
     eks_nodes = {
