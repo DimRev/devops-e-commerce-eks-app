@@ -35,9 +35,5 @@ class Config:
         return self._AWS_REGION
 
     @property
-    def API_URL(self):
-        return self._API_URL
-
-    @property
     def VERSION(self):
         return self._VERSION

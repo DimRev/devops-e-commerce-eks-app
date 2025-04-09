@@ -171,5 +171,3 @@ module "frontend_dist" {
   s3_bucket_domain_name = aws_s3_bucket.app_bucket.bucket_regional_domain_name
   html_directory        = "html" # Directory in the bucket where React app files will be stored
 }
-
-# Output the CloudFront URL for the frontend

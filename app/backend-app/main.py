@@ -1,13 +1,10 @@
-import os
-import json
-
-from flask import Flask, send_from_directory, request
+from flask import Flask
 from flask_cors import CORS
 
 from auth.auth_controller import auth_bp
 from config.config import Config
 
-app = Flask(__name__, static_folder='dist', static_url_path='')
+app = Flask(__name__)
 CORS(app)
 
 config = Config()
