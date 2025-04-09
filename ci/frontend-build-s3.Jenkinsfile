@@ -117,6 +117,9 @@ EOL
                             sh "pnpm i"
                             sh "pnpm run build"
                         }
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
+                            sh "aws s3 sync app/frontend-app/dist/ s3://${ENV}-${APP_NAME}-app-bucket/html/ --delete"
+                        }
                     } catch (Exception e) {
                         ERROR = e.getMessage()
                         throw e
@@ -129,32 +132,6 @@ EOL
                 }
                 failure {
                     echo "========FAILURE: Build React App========"
-                    echo "ERROR: ${ERROR}"
-                }
-            }
-        }
-
-        stage("Deploy to S3") {
-            steps {
-                script {
-                    echo "========EXEC: Deploy to S3========"
-                    try {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
-                            // Sync the build directory to the S3 bucket's html directory
-                            sh "aws s3 sync app/frontend-app/dist/ s3://${ENV}-${APP_NAME}-app-bucket/html/ --delete"
-                        }
-                    } catch (Exception e) {
-                        ERROR = e.getMessage()
-                        throw e
-                    }
-                }
-            }
-            post {
-                success {
-                    echo "========SUCCESS: Deploy to S3========"
-                }
-                failure {
-                    echo "========FAILURE: Deploy to S3========"
                     echo "ERROR: ${ERROR}"
                 }
             }
