@@ -113,7 +113,7 @@ EOL
                 script {
                     echo "========EXEC: Build React App========"
                     try {
-                        dir('frontend-app') {
+                        dir('app/frontend-app') {
                             sh "pnpm run build"
                         }
                     } catch (Exception e) {
