@@ -82,7 +82,7 @@ pipeline {
                     try {
                         // Create .env file for React app with the provided API URL
                         sh """
-                        cat > frontend-app/.env.production << EOL
+                        cat > app/frontend-app/.env.production << EOL
 VITE_API_URL=${API_URL}
 VITE_APP_ENV=${ENV}
 VITE_APP_NAME=${APP_NAME}
@@ -90,7 +90,7 @@ VITE_APP_VERSION=\$(date +%Y.%m.%d-%H%M)
 EOL
                         """
 
-                        sh "cat frontend-app/.env.production"
+                        sh "cat app/frontend-app/.env.production"
                     } catch (Exception e) {
                         ERROR = e.getMessage()
                         throw e
@@ -142,7 +142,7 @@ EOL
                     try {
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
                             // Sync the build directory to the S3 bucket's html directory
-                            sh "aws s3 sync frontend-app/dist/ s3://${ENV}-${APP_NAME}-app-bucket/html/ --delete"
+                            sh "aws s3 sync app/frontend-app/dist/ s3://${ENV}-${APP_NAME}-app-bucket/html/ --delete"
 
                             // Get the CloudFront distribution URL
                             sh """
