@@ -142,17 +142,6 @@ EOL
                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
                             // Sync the build directory to the S3 bucket's html directory
                             sh "aws s3 sync app/frontend-app/dist/ s3://${ENV}-${APP_NAME}-app-bucket/html/ --delete"
-
-                            // Get the CloudFront distribution URL
-                            sh """
-                            DISTRIBUTION_DOMAIN=\$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Origins.Items[].DomainName, '${ENV}-${APP_NAME}-app-bucket')].DomainName" --output text)
-                            if [ -n "\$DISTRIBUTION_DOMAIN" ]; then
-                                echo "Frontend deployed successfully!"
-                                echo "CloudFront URL: https://\$DISTRIBUTION_DOMAIN"
-                            else
-                                echo "Frontend deployed to S3 bucket: ${ENV}-${APP_NAME}-app-bucket/html/"
-                            fi
-                            """
                         }
                     } catch (Exception e) {
                         ERROR = e.getMessage()
@@ -166,42 +155,6 @@ EOL
                 }
                 failure {
                     echo "========FAILURE: Deploy to S3========"
-                    echo "ERROR: ${ERROR}"
-                }
-            }
-        }
-
-        stage("Invalidate CloudFront Cache") {
-            steps {
-                script {
-                    echo "========EXEC: Invalidate CloudFront Cache========"
-                    try {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_credentials']]) {
-                            sh """
-                            # Get the CloudFront distribution ID
-                            DISTRIBUTION_ID=\$(aws cloudfront list-distributions --query "DistributionList.Items[?contains(Origins.Items[].DomainName, '${ENV}-${APP_NAME}-app-bucket')].Id" --output text)
-
-                            if [ -n "\$DISTRIBUTION_ID" ]; then
-                                echo "Invalidating CloudFront cache for distribution: \$DISTRIBUTION_ID"
-                                aws cloudfront create-invalidation --distribution-id \$DISTRIBUTION_ID --paths "/*"
-                                echo "Cache invalidation initiated"
-                            else
-                                echo "No CloudFront distribution found for this bucket"
-                            fi
-                            """
-                        }
-                    } catch (Exception e) {
-                        ERROR = e.getMessage()
-                        throw e
-                    }
-                }
-            }
-            post {
-                success {
-                    echo "========SUCCESS: Invalidate CloudFront Cache========"
-                }
-                failure {
-                    echo "========FAILURE: Invalidate CloudFront Cache========"
                     echo "ERROR: ${ERROR}"
                 }
             }
