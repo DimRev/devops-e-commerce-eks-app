@@ -13,15 +13,62 @@ resource "aws_key_pair" "key_pair" {
   }
 }
 
+
 resource "aws_s3_bucket" "app_bucket" {
   bucket        = "${var.environment}-${var.app_name}-app-bucket"
   force_destroy = var.environment == "dev" ? true : false
+
   tags = {
     Name      = "${var.environment}-${var.app_name}-app-bucket"
     Terraform = "true"
     Env       = var.environment
   }
 }
+
+resource "aws_s3_bucket_public_access_block" "app_bucket_access_block" {
+  bucket = aws_s3_bucket.app_bucket.id
+
+  block_public_policy     = false
+  block_public_acls       = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+
+resource "aws_s3_bucket_policy" "app_bucket_public_read" {
+  bucket = aws_s3_bucket.app_bucket.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.app_bucket.arn}/html/*"
+      }
+    ]
+  })
+  depends_on = [
+    aws_s3_bucket_website_configuration.app_bucket_website,
+    aws_s3_bucket_public_access_block.app_bucket_access_block,
+  ]
+}
+
+resource "aws_s3_bucket_website_configuration" "app_bucket_website" {
+  bucket = aws_s3_bucket.app_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "html/index.html"
+  }
+
+  depends_on = [aws_s3_bucket_public_access_block.app_bucket_access_block]
+}
+
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -160,14 +207,4 @@ module "jenkins" {
   environment = var.environment
 }
 
-# Add the frontend_dist module
-module "frontend_dist" {
-  source = "./modules/frontend_dist"
 
-  app_name              = var.app_name
-  environment           = var.environment
-  s3_bucket_id          = aws_s3_bucket.app_bucket.id
-  s3_bucket_arn         = aws_s3_bucket.app_bucket.arn
-  s3_bucket_domain_name = aws_s3_bucket.app_bucket.bucket_regional_domain_name
-  html_directory        = "html" # Directory in the bucket where React app files will be stored
-}

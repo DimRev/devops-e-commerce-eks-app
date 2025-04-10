@@ -11,6 +11,7 @@ export default defineConfig({
       '~': path.resolve(__dirname, './src'),
     },
   },
+  base: '/html/',
   build: {
     outDir: '../backend-app/dist',
   },

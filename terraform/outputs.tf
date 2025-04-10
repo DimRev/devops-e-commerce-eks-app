@@ -56,7 +56,7 @@ output "jenkins_ip" {
 #############################
 # Frontend Output
 #############################
-output "frontend_url" {
-  description = "The URL of the frontend application"
-  value       = module.frontend_dist.cloudfront_distribution_domain_name
+output "s3_website_endpoint" {
+  description = "The HTTP endpoint for the S3 static website"
+  value       = aws_s3_bucket_website_configuration.app_bucket_website.website_endpoint
 }
