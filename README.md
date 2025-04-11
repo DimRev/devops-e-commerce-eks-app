@@ -73,3 +73,28 @@ cat /var/lib/jenkins/secrets/initialAdminPassword
 14. use pnpm@10 to install frontend dependencies, if you're using npm 18 +, simply use `npm i -g pnpm@10` to install pnpm.
 
 15. Deploy the frontend app to the S3 bucket using `frontend-deploy.sh` script.
+
+## Production Enhancements
+
+To move this demo towards a production-ready setup, consider the following changes:
+
+### Frontend (S3 via CloudFront)
+
+1.  **Create CloudFront Distribution:** Set up an AWS CloudFront distribution.
+2.  **Configure S3 Origin:** Point the CloudFront distribution's origin to the `S3_app` bucket.
+3.  **Restrict S3 Bucket Access:** Remove public access from the S3 bucket. Use CloudFront Origin Access Identity (OAI) or Origin Access Control (OAC) to allow CloudFront to securely read from the bucket.
+4.  **Enable HTTPS:** Attach an AWS Certificate Manager (ACM) SSL/TLS certificate to the CloudFront distribution for your custom domain.
+5.  **Set Root Object:** Configure the CloudFront distribution's default root object to `index.html`.
+
+### Backend (EKS Load Balancer with HTTPS)
+
+1.  **Provision Certificate:** Create or import an SSL/TLS certificate for your backend's custom domain using AWS Certificate Manager (ACM).
+2.  **Configure Load Balancer Listener:** Modify the AWS Load Balancer (ALB/NLB) serving the EKS service:
+    - Add an HTTPS listener on port 443.
+    - Associate the ACM certificate with this listener.
+    - Configure the listener to forward traffic to the target group pointing to your EKS pods (likely on HTTP, as TLS terminates at the LB).
+3.  **Update Frontend Configuration:** Ensure the frontend application makes API requests to the new HTTPS endpoint (`https://your-api-domain.com`).
+
+### DNS
+
+- Update your DNS records (e.g., using Route 53) to point your custom domain(s) to the CloudFront distribution (for the frontend) and the Load Balancer (for the backend API).
