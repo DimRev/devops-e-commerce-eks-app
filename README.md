@@ -2,7 +2,7 @@
 
 ## Introduction
 
-![Architecture](./assets/architecture.png)
+![Architecture](./assets/overview.png)
 
 ## Prerequisites
 
