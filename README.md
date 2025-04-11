@@ -68,7 +68,7 @@ cat /var/lib/jenkins/secrets/initialAdminPassword
 
 12. Build the pipeline and provide the required details, This pipeline will deploy the required helm charts inside cluster, or updated them if they already exist.
 
-13. Inside the `app/frontend-app` create a `.env.production` file with the details from the [.env.example](./app/frontend-app/.env.example) file.
+13. Inside the `app/frontend-app` create a `.env.production` file with the details from the [.env.example](./app/frontend-app/.env.example) file **IMPORTANT** the `VITE_API_URL` should point to the backend loadbalancer endpoint via http.
 
 14. use pnpm@10 to install frontend dependencies, if you're using npm 18 +, simply use `npm i -g pnpm@10` to install pnpm.
 
