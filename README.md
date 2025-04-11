@@ -229,6 +229,31 @@ To move this demo towards a production-ready setup, consider the following chang
 
 To avoid ongoing AWS charges, destroy the infrastructure created by Terraform when you are finished.
 
+### Destroy K8s resources (Helm charts, etc.)
+
+1.  **Create Destroy Pipeline:**
+
+    - In Jenkins, click `New Item`.
+    - Enter a name (e.g., `backend-helm-destroy`).
+    - Select `Pipeline`.
+    - Click `OK`.
+    - In the configuration page, scroll down to the `Pipeline` section.
+    - Definition: `Pipeline script from SCM`.
+    - SCM: `Git`.
+    - Repository URL: Enter the URL of your Git repository.
+    - Credentials: Configure if your repository is private.
+    - Branch Specifier: Specify the branch (e.g., `*/main`).
+    - Script Path: `ci/backend-helm-destroy.Jenkinsfile`.
+    - Save the pipeline.
+
+2.  **Run Destroy Pipeline:**
+    - Go to the `backend-helm-destroy` pipeline dashboard.
+    - Click `Build with Parameters`.
+    - Provide any required parameters (e.g., environment name).
+    - Click `Build`. This pipeline fetches the `.env` from S3, injects it as a secret, and destroys/uninstalls the backend application Helm chart (from `k8s/backend-helm`) in the EKS cluster.
+
+### Destroy EKS resources (EKS cluster, EC2 instances, Load Balancers, etc.)
+
 ```bash
 # Ensure you are in the terraform directory
 cd terraform
